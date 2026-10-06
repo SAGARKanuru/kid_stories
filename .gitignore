@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+episodes/*/build/
+episodes/*/video.mp4
+episodes/*/render.json
+samples/*/build/
+samples/*/video.mp4
+samples/*/render.json
+client_secret*.json
+.env

@@ -1,0 +1,76 @@
+name: Render & upload episode
+
+on:
+  push:
+    branches: [main]
+    paths: ["episodes/**/story.json"]
+  workflow_dispatch:
+    inputs:
+      episode:
+        description: "Episode folder to (re)render, e.g. episodes/2026-10-07 (blank = all pending)"
+        required: false
+      upload:
+        description: "Upload to YouTube"
+        type: boolean
+        default: true
+
+concurrency:
+  group: render-upload
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install ffmpeg and Cairo
+        run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg libcairo2
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Render (and upload)
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.episode }}" ]; then ARGS="--episode ${{ github.event.inputs.episode }}"; fi
+          if [ "${{ github.event.inputs.upload }}" = "false" ]; then ARGS="$ARGS --no-upload"; fi
+          if [ -z "$YT_REFRESH_TOKEN" ]; then
+            echo "::warning::YouTube secrets are not set yet - rendering only. See README step 3."
+            ARGS="$ARGS --no-upload"
+          fi
+          python -m kidsvideo.run $ARGS
+
+      - name: Keep the video for 7 days (download from this run's page)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: episode-video
+          path: |
+            episodes/*/video.mp4
+            episodes/*/thumbnail.jpg
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Record upload in the repo
+        run: |
+          git config user.name "kids-story-bot"
+          git config user.email "kids-story-bot@users.noreply.github.com"
+          git add data/history.json episodes/*/upload.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Record uploaded episode [skip ci]"
+            git push
+          fi

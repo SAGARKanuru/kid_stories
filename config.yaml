@@ -1,0 +1,51 @@
+# Daily kids' story channel — settings. Edit and commit; the next run picks them up.
+
+channel_name: "Little Lantern Stories"
+
+story:
+  language: "English"
+  audience: "children aged 3 to 8"
+  scenes: [8, 10]                # scenes per episode -> roughly 3-4 minute videos
+  themes:                        # the daily task rotates through these
+    - kindness
+    - sharing
+    - honesty
+    - courage
+    - patience
+    - gratitude
+    - teamwork
+    - curiosity
+    - trying again after failing
+    - listening to others
+    - caring for nature
+    - making a new friend
+    - saying sorry
+    - helping at home
+    - being yourself
+    - healthy habits
+    - respecting elders
+    - managing big feelings
+
+voice:
+  # Narrator. Free Microsoft neural voices via edge-tts.
+  # Alternatives: en-IN-NeerjaNeural (Indian English), en-GB-SoniaNeural
+  narrator: "en-US-JennyNeural"
+  rate: "-8%"
+  pitch: "+0Hz"
+
+video:
+  width: 1920
+  height: 1080
+  fps: 24
+  captions: true
+  music_volume: 0.10
+  ambience_volume: 0.16
+  sfx_volume: 0.45
+
+youtube:
+  privacy: "private"             # private | unlisted | public (public needs Google API audit, see README)
+  category_id: "1"               # 1 = Film & Animation, 27 = Education
+  made_for_kids: true            # required for children's content (COPPA)
+  contains_synthetic_media: true # discloses AI-generated story, art and voices
+  default_language: "en"
+  playlist_id: ""                # optional: add each upload to this playlist

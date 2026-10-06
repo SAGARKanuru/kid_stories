@@ -1,0 +1,28 @@
+{
+ "id": "pip",
+ "name": "Pip",
+ "species": "little fox kit",
+ "personality": "curious, energetic, sometimes impatient, big-hearted",
+ "look": "small orange fox with cream muzzle and belly, white-tipped bushy tail, dark brown paws, big dark eyes, green scarf",
+ "voice": {
+  "name": "en-US-AnaNeural",
+  "rate": "-4%",
+  "pitch": "+0Hz"
+ },
+ "viewbox": [
+  400,
+  520
+ ],
+ "neck": [
+  200,
+  300
+ ],
+ "parts": {
+  "body": "<defs><radialGradient id=\"pb\" cx=\"42%\" cy=\"30%\" r=\"75%\"><stop offset=\"0\" stop-color=\"#FFAD5E\"/><stop offset=\"1\" stop-color=\"#DC6418\"/></radialGradient>\n<linearGradient id=\"pt\" x1=\"0\" y1=\"1\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#D95F17\"/><stop offset=\"1\" stop-color=\"#FFA954\"/></linearGradient>\n<radialGradient id=\"pbel\" cx=\"50%\" cy=\"35%\" r=\"70%\"><stop offset=\"0\" stop-color=\"#FFFBF3\"/><stop offset=\"1\" stop-color=\"#F6DFC5\"/></radialGradient></defs>\n<path d=\"M255 440 C335 445 392 375 372 300 C362 258 330 246 305 262 C330 300 318 370 252 400 Z\" fill=\"url(#pt)\"/>\n<path d=\"M372 300 C362 258 330 246 305 262 C320 280 338 300 352 326 C366 324 375 314 372 300Z\" fill=\"#FFF6EA\"/>\n<rect x=\"140\" y=\"418\" width=\"46\" height=\"84\" rx=\"23\" fill=\"#E5732A\"/><rect x=\"214\" y=\"418\" width=\"46\" height=\"84\" rx=\"23\" fill=\"#E5732A\"/>\n<ellipse cx=\"163\" cy=\"500\" rx=\"34\" ry=\"19\" fill=\"#4E2A1C\"/><ellipse cx=\"237\" cy=\"500\" rx=\"34\" ry=\"19\" fill=\"#4E2A1C\"/>\n<ellipse cx=\"200\" cy=\"392\" rx=\"96\" ry=\"104\" fill=\"url(#pb)\"/>\n<ellipse cx=\"200\" cy=\"410\" rx=\"60\" ry=\"74\" fill=\"url(#pbel)\"/>\n<path d=\"M122 345 C96 385 98 430 122 442 C140 446 150 428 144 404 C140 385 140 365 146 350 Z\" fill=\"#E06C22\"/>\n<path d=\"M278 345 C304 385 302 430 278 442 C260 446 250 428 256 404 C260 385 260 365 254 350 Z\" fill=\"#E06C22\"/>\n<ellipse cx=\"124\" cy=\"438\" rx=\"18\" ry=\"14\" fill=\"#4E2A1C\"/><ellipse cx=\"276\" cy=\"438\" rx=\"18\" ry=\"14\" fill=\"#4E2A1C\"/>\n<path d=\"M118 300 C160 328 240 328 282 300 L288 334 C244 358 156 358 112 334 Z\" fill=\"#3DAA66\"/>\n<path d=\"M118 300 C160 328 240 328 282 300 L284 312 C240 338 160 338 116 312Z\" fill=\"#5CC783\"/>\n<path d=\"M240 335 L268 402 L236 398 L224 340Z\" fill=\"#2E9155\"/>\n<ellipse cx=\"200\" cy=\"292\" rx=\"70\" ry=\"10\" fill=\"#000\" opacity=\".12\"/>",
+  "head": "<defs><radialGradient id=\"ph\" cx=\"40%\" cy=\"28%\" r=\"80%\"><stop offset=\"0\" stop-color=\"#FFB466\"/><stop offset=\"1\" stop-color=\"#DB6216\"/></radialGradient>\n<radialGradient id=\"pm\" cx=\"50%\" cy=\"30%\" r=\"70%\"><stop offset=\"0\" stop-color=\"#FFFFFF\"/><stop offset=\"1\" stop-color=\"#F3DCC4\"/></radialGradient></defs>\n<path d=\"M112 152 L92 36 L188 108 Z\" fill=\"#DE6A1C\"/><path d=\"M121 136 L110 64 L168 112Z\" fill=\"#FFCFB8\"/>\n<path d=\"M288 152 L308 36 L212 108 Z\" fill=\"#DE6A1C\"/><path d=\"M279 136 L290 64 L232 112Z\" fill=\"#FFCFB8\"/>\n<path d=\"M200 88 C292 88 334 160 324 216 C314 268 262 304 200 304 C138 304 86 268 76 216 C66 160 108 88 200 88Z\" fill=\"url(#ph)\"/>\n<path d=\"M200 172 C252 172 302 208 308 236 C292 282 252 302 200 302 C148 302 108 282 92 236 C98 208 148 172 200 172Z\" fill=\"url(#pm)\"/>\n<ellipse cx=\"200\" cy=\"230\" rx=\"18\" ry=\"13\" fill=\"#3A2218\"/><ellipse cx=\"194\" cy=\"226\" rx=\"6\" ry=\"3.5\" fill=\"#fff\" opacity=\".7\"/>\n<ellipse cx=\"128\" cy=\"244\" rx=\"21\" ry=\"12\" fill=\"#FF8F9A\" opacity=\".5\"/><ellipse cx=\"272\" cy=\"244\" rx=\"21\" ry=\"12\" fill=\"#FF8F9A\" opacity=\".5\"/>\n<path d=\"M150 140 Q165 132 180 140\" stroke=\"#B4500F\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\" opacity=\".6\"/>\n<path d=\"M220 140 Q235 132 250 140\" stroke=\"#B4500F\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\" opacity=\".6\"/>",
+  "eyes_open": "<ellipse cx=\"160\" cy=\"190\" rx=\"22\" ry=\"27\" fill=\"#2A1A12\"/><ellipse cx=\"240\" cy=\"190\" rx=\"22\" ry=\"27\" fill=\"#2A1A12\"/>\n<circle cx=\"168\" cy=\"179\" r=\"8.5\" fill=\"#fff\"/><circle cx=\"248\" cy=\"179\" r=\"8.5\" fill=\"#fff\"/>\n<circle cx=\"154\" cy=\"201\" r=\"4\" fill=\"#fff\" opacity=\".8\"/><circle cx=\"234\" cy=\"201\" r=\"4\" fill=\"#fff\" opacity=\".8\"/>",
+  "eyes_closed": "<path d=\"M139 192 Q160 207 181 192\" stroke=\"#2A1A12\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/>\n<path d=\"M219 192 Q240 207 261 192\" stroke=\"#2A1A12\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/>",
+  "mouth_closed": "<path d=\"M184 252 Q200 266 216 252\" stroke=\"#3A2218\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\"/>",
+  "mouth_open": "<path d=\"M181 249 Q200 246 219 249 Q216 283 200 285 Q184 283 181 249Z\" fill=\"#6E2526\"/><ellipse cx=\"200\" cy=\"276\" rx=\"11\" ry=\"6\" fill=\"#FF8A8A\"/>"
+ }
+}

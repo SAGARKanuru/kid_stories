@@ -1,0 +1,28 @@
+{
+ "id": "tumble",
+ "name": "Tumble",
+ "species": "baby elephant",
+ "personality": "gentle, kind, a little shy, very strong, loves to help",
+ "look": "chubby blue-grey baby elephant with big pink-lined ears, trunk curling to one side, yellow cap",
+ "voice": {
+  "name": "en-GB-MaisieNeural",
+  "rate": "-8%",
+  "pitch": "-4Hz"
+ },
+ "viewbox": [
+  420,
+  520
+ ],
+ "neck": [
+  210,
+  320
+ ],
+ "parts": {
+  "body": "<defs><radialGradient id=\"tb\" cx=\"40%\" cy=\"30%\" r=\"80%\"><stop offset=\"0\" stop-color=\"#B9CADB\"/><stop offset=\"1\" stop-color=\"#7A8FA8\"/></radialGradient></defs>\n<path d=\"M330 400 C352 405 360 420 352 432\" stroke=\"#7A8FA8\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/>\n<rect x=\"118\" y=\"420\" width=\"62\" height=\"92\" rx=\"28\" fill=\"#8396AE\"/><rect x=\"240\" y=\"420\" width=\"62\" height=\"92\" rx=\"28\" fill=\"#8396AE\"/>\n<ellipse cx=\"210\" cy=\"400\" rx=\"128\" ry=\"106\" fill=\"url(#tb)\"/>\n<ellipse cx=\"210\" cy=\"420\" rx=\"74\" ry=\"70\" fill=\"#C9D7E4\" opacity=\".75\"/>\n<rect x=\"140\" y=\"440\" width=\"58\" height=\"72\" rx=\"26\" fill=\"#93A6BC\"/><rect x=\"222\" y=\"440\" width=\"58\" height=\"72\" rx=\"26\" fill=\"#93A6BC\"/>\n<path d=\"M146 504 h46 M228 504 h46\" stroke=\"#E8EEF4\" stroke-width=\"8\" stroke-linecap=\"round\"/>\n<ellipse cx=\"210\" cy=\"310\" rx=\"80\" ry=\"12\" fill=\"#000\" opacity=\".1\"/>",
+  "head": "<defs><radialGradient id=\"th\" cx=\"40%\" cy=\"28%\" r=\"80%\"><stop offset=\"0\" stop-color=\"#C3D2E1\"/><stop offset=\"1\" stop-color=\"#7D92AB\"/></radialGradient>\n<linearGradient id=\"tc\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#FFD85A\"/><stop offset=\"1\" stop-color=\"#F2AE16\"/></linearGradient></defs>\n<ellipse cx=\"88\" cy=\"215\" rx=\"82\" ry=\"100\" fill=\"#8A9DB4\"/><ellipse cx=\"96\" cy=\"218\" rx=\"56\" ry=\"72\" fill=\"#F4B8C4\"/>\n<ellipse cx=\"332\" cy=\"215\" rx=\"82\" ry=\"100\" fill=\"#8A9DB4\"/><ellipse cx=\"324\" cy=\"218\" rx=\"56\" ry=\"72\" fill=\"#F4B8C4\"/>\n<circle cx=\"210\" cy=\"210\" r=\"122\" fill=\"url(#th)\"/>\n<path d=\"M196 214 C192 262 200 306 232 330 C256 346 288 338 294 318 Z\" fill=\"#000\" opacity=\".10\"/>\n<path d=\"M190 212 C184 262 192 304 222 326 C250 346 292 336 298 310 C302 292 284 284 274 296 C268 308 250 312 238 302 C222 288 224 252 230 212 Z\" fill=\"#A9BCCF\" stroke=\"#6F849E\" stroke-width=\"4\" stroke-linejoin=\"round\"/>\n<path d=\"M190 240 q20 8 40 0 M192 266 q20 8 40 0 M204 292 q18 8 34 -2\" stroke=\"#6E829B\" stroke-width=\"4\" fill=\"none\" stroke-linecap=\"round\" opacity=\".55\"/>\n<ellipse cx=\"128\" cy=\"236\" rx=\"20\" ry=\"12\" fill=\"#FF9EB0\" opacity=\".5\"/><ellipse cx=\"282\" cy=\"242\" rx=\"18\" ry=\"11\" fill=\"#FF9EB0\" opacity=\".45\"/>\n<path d=\"M112 140 C118 66 302 66 308 140 Z\" fill=\"url(#tc)\"/>\n<path d=\"M300 132 C334 126 372 138 378 152 C344 160 314 154 292 150Z\" fill=\"#E59A0C\"/>\n<circle cx=\"210\" cy=\"82\" r=\"10\" fill=\"#E59A0C\"/>\n<path d=\"M150 128 Q210 112 270 128\" stroke=\"#fff\" stroke-width=\"5\" fill=\"none\" opacity=\".35\"/>",
+  "eyes_open": "<ellipse cx=\"168\" cy=\"196\" rx=\"17\" ry=\"21\" fill=\"#23262F\"/><ellipse cx=\"246\" cy=\"196\" rx=\"17\" ry=\"21\" fill=\"#23262F\"/>\n<circle cx=\"174\" cy=\"187\" r=\"6.5\" fill=\"#fff\"/><circle cx=\"252\" cy=\"187\" r=\"6.5\" fill=\"#fff\"/><circle cx=\"163\" cy=\"204\" r=\"3\" fill=\"#fff\" opacity=\".8\"/><circle cx=\"241\" cy=\"204\" r=\"3\" fill=\"#fff\" opacity=\".8\"/>",
+  "eyes_closed": "<path d=\"M151 198 Q168 210 185 198\" stroke=\"#23262F\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M229 198 Q246 210 263 198\" stroke=\"#23262F\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\"/>",
+  "mouth_closed": "<path d=\"M150 266 Q166 280 184 270\" stroke=\"#4A4E5C\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\"/>",
+  "mouth_open": "<path d=\"M148 262 Q168 258 186 266 Q182 294 166 296 Q152 292 148 262Z\" fill=\"#7A3040\"/><ellipse cx=\"167\" cy=\"287\" rx=\"9\" ry=\"5\" fill=\"#FF8FA0\"/>"
+ }
+}

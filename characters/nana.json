@@ -1,0 +1,28 @@
+{
+ "id": "nana",
+ "name": "Nana Hoot",
+ "species": "grandmother owl",
+ "personality": "wise, warm, patient, gently funny; gives advice with a story",
+ "look": "plump brown owl with cream face disc, ear tufts, round gold glasses, lilac knitted shawl, orange feet",
+ "voice": {
+  "name": "en-GB-SoniaNeural",
+  "rate": "-14%",
+  "pitch": "-8Hz"
+ },
+ "viewbox": [
+  400,
+  520
+ ],
+ "neck": [
+  200,
+  290
+ ],
+ "parts": {
+  "body": "<defs><radialGradient id=\"nb\" cx=\"40%\" cy=\"30%\" r=\"80%\"><stop offset=\"0\" stop-color=\"#B08A74\"/><stop offset=\"1\" stop-color=\"#6F4E3E\"/></radialGradient>\n<linearGradient id=\"ns\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#C9A6E8\"/><stop offset=\"1\" stop-color=\"#9A72C4\"/></linearGradient></defs>\n<path d=\"M150 492 l-14 22 M150 492 l0 24 M150 492 l14 22 M250 492 l-14 22 M250 492 l0 24 M250 492 l14 22\" stroke=\"#F09A3A\" stroke-width=\"10\" stroke-linecap=\"round\"/>\n<ellipse cx=\"200\" cy=\"380\" rx=\"118\" ry=\"128\" fill=\"url(#nb)\"/>\n<path d=\"M200 300 C262 300 286 380 272 440 C256 492 144 492 128 440 C114 380 138 300 200 300Z\" fill=\"#EADBC8\"/>\n<path d=\"M160 360 q10 10 20 0 q10 10 20 0 q10 10 20 0 q10 10 20 0 M150 395 q10 10 20 0 q10 10 20 0 q10 10 20 0 q10 10 20 0 q10 10 20 0 M158 430 q10 10 20 0 q10 10 20 0 q10 10 20 0 q10 10 20 0\" stroke=\"#C9B49B\" stroke-width=\"4\" fill=\"none\"/>\n<path d=\"M86 350 C64 410 84 470 128 480 C122 430 120 380 130 330Z\" fill=\"#5E4033\"/>\n<path d=\"M314 350 C336 410 316 470 272 480 C278 430 280 380 270 330Z\" fill=\"#5E4033\"/>\n<path d=\"M92 300 C150 345 250 345 308 300 L318 350 C270 400 130 400 82 350Z\" fill=\"url(#ns)\"/>\n<path d=\"M100 330 L300 330 M96 345 L304 345\" stroke=\"#B48CDC\" stroke-width=\"4\" stroke-dasharray=\"10 8\" opacity=\".7\"/>\n<circle cx=\"200\" cy=\"378\" r=\"12\" fill=\"#F4C65A\"/>",
+  "head": "<defs><radialGradient id=\"nh\" cx=\"40%\" cy=\"28%\" r=\"80%\"><stop offset=\"0\" stop-color=\"#B9927B\"/><stop offset=\"1\" stop-color=\"#6F4E3E\"/></radialGradient></defs>\n<path d=\"M98 120 L86 40 L156 100Z\" fill=\"#6F4E3E\"/><path d=\"M302 120 L314 40 L244 100Z\" fill=\"#6F4E3E\"/>\n<ellipse cx=\"200\" cy=\"190\" rx=\"126\" ry=\"112\" fill=\"url(#nh)\"/>\n<path d=\"M200 128 C230 98 300 104 306 168 C312 232 262 282 200 290 C138 282 88 232 94 168 C100 104 170 98 200 128Z\" fill=\"#F1E4D2\"/>\n<circle cx=\"152\" cy=\"184\" r=\"44\" fill=\"none\" stroke=\"#D9A632\" stroke-width=\"7\"/><circle cx=\"248\" cy=\"184\" r=\"44\" fill=\"none\" stroke=\"#D9A632\" stroke-width=\"7\"/>\n<path d=\"M194 180 Q200 172 206 180\" stroke=\"#D9A632\" stroke-width=\"6\" fill=\"none\"/>\n<ellipse cx=\"128\" cy=\"240\" rx=\"18\" ry=\"10\" fill=\"#FF9EA8\" opacity=\".45\"/><ellipse cx=\"272\" cy=\"240\" rx=\"18\" ry=\"10\" fill=\"#FF9EA8\" opacity=\".45\"/>",
+  "eyes_open": "<circle cx=\"152\" cy=\"184\" r=\"27\" fill=\"#fff\"/><circle cx=\"248\" cy=\"184\" r=\"27\" fill=\"#fff\"/>\n<circle cx=\"155\" cy=\"187\" r=\"18\" fill=\"#E8A030\"/><circle cx=\"245\" cy=\"187\" r=\"18\" fill=\"#E8A030\"/>\n<circle cx=\"156\" cy=\"188\" r=\"10\" fill=\"#241812\"/><circle cx=\"244\" cy=\"188\" r=\"10\" fill=\"#241812\"/>\n<circle cx=\"161\" cy=\"181\" r=\"4.5\" fill=\"#fff\"/><circle cx=\"249\" cy=\"181\" r=\"4.5\" fill=\"#fff\"/>",
+  "eyes_closed": "<path d=\"M128 186 Q152 202 176 186\" stroke=\"#3C2A20\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\"/>\n<path d=\"M224 186 Q248 202 272 186\" stroke=\"#3C2A20\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\"/>",
+  "mouth_closed": "<path d=\"M184 222 L216 222 L200 250Z\" fill=\"#F0A040\"/><path d=\"M188 224 L212 224\" stroke=\"#C97A1E\" stroke-width=\"3\"/>",
+  "mouth_open": "<path d=\"M182 216 L218 216 L200 238Z\" fill=\"#F0A040\"/><path d=\"M188 244 L212 244 L200 262Z\" fill=\"#E08A2C\"/><path d=\"M190 236 L210 236 L200 246Z\" fill=\"#7A2E2E\"/>"
+ }
+}
