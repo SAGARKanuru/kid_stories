@@ -15,7 +15,7 @@ No paid AI video or voice services are used: voices are free Microsoft neural vo
 
 - Three depth layers per scene with parallax camera moves (pan, push-in, pull-out, drift) and depth-of-field blur
 - Rigged characters that breathe, blink, turn their heads, walk, hop and **lip-sync** their own lines
-- A separate voice for each character plus a narrator; original music that ducks under speech
+- A friendly kid narrator ("Hi friends!…") and a separate voice for each character; original music that ducks under speech
 - Scene ambience (birds, wind, stream, rain, crickets, fire…) and sound effects on cue
 - Fireflies, sparkles, falling leaves, snow and rain; time-of-day lighting and vignette
 - Title card, "The End" card with the moral, captions, crossfades and an auto-made thumbnail
@@ -45,7 +45,10 @@ Sign in with the account that owns the channel. Add the three printed values in 
 - Verify your channel at [youtube.com/verify](https://www.youtube.com/verify) so custom thumbnails can be set.
 - In YouTube Studio → Settings → Channel → Advanced, set the audience to *Yes, it's made for kids*.
 
-### 5. Test it
+### 5. Pick the voices (optional)
+GitHub → **Actions → Voice samples → Run workflow**, then download the MP3s from the run page. The narrator is a cheerful child voice by default; Pip and Tumble are kid voices and Nana Hoot is a grandma voice. Change them in `config.yaml` (narrator) and `characters/*.json` (`voice`).
+
+### 6. Test it
 GitHub → **Actions → Render & upload episode → Run workflow** with episode `samples/pip-and-the-runaway-kite` and *Upload* unchecked. Download the video from the run page (Artifacts).
 
 ## Important YouTube rules

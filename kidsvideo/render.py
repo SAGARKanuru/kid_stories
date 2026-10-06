@@ -380,15 +380,17 @@ def build_timeline(story, cfg, characters, cache):
 
     segs = []
     title_idx = story.get("title_scene", 0)
-    intro_line = {"text": f"{cfg['channel_name']} presents... {story['title']}.", "speaker": None}
+    intro_line = {"text": story.get("intro") or f"Hi friends! Welcome to {cfg['channel_name']}! Today's story is... {story['title']}!",
+                  "speaker": None}
     segs.append({"kind": "intro", "scene": story["scenes"][title_idx], "lines": [intro_line], "lead": 1.4, "tail": 1.6,
                  "min": 5.5, "sfx": [{"at": 0.25, "name": "twinkle"}]})
     for sc in story["scenes"]:
         segs.append({"kind": "scene", "scene": sc, "lines": sc["narration"], "lead": 0.8, "tail": 1.1, "min": 4.0,
                      "sfx": sc.get("sfx", [])})
-    outro_text = f"The End. And remember: {story['moral']}"
+    outro_text = story.get("outro") or (f"The End! Remember, friends: {story['moral']} "
+                                         "Did you like this story? See you tomorrow for a brand-new one. Bye-bye!")
     segs.append({"kind": "outro", "scene": story["scenes"][story.get("outro_scene", -1)],
-                 "lines": [{"text": outro_text, "speaker": None}], "lead": 1.2, "tail": 3.5, "min": 8.0,
+                 "lines": [{"text": outro_text, "speaker": None}], "lead": 1.0, "tail": 2.5, "min": 8.0,
                  "sfx": [{"at": 0.3, "name": "chime"}]})
 
     t = 0.0

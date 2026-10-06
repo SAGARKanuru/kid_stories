@@ -27,11 +27,13 @@ story:
     - managing big feelings
 
 voice:
-  # Narrator. Free Microsoft neural voices via edge-tts.
-  # Alternatives: en-IN-NeerjaNeural (Indian English), en-GB-SoniaNeural
-  narrator: "en-US-JennyNeural"
-  rate: "-8%"
-  pitch: "+0Hz"
+  # Narrator: a cheerful kid storyteller (free Microsoft neural voices via edge-tts).
+  # Child voices: en-US-AnaNeural (American girl), en-GB-MaisieNeural (British girl).
+  # Grown-up options: en-IN-NeerjaNeural (Indian English), en-US-JennyNeural, en-GB-SoniaNeural.
+  # Run the "Voice samples" workflow in GitHub Actions to hear them before changing.
+  narrator: "en-US-AnaNeural"
+  rate: "+0%"
+  pitch: "+4Hz"
 
 video:
   width: 1920

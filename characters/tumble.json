@@ -5,9 +5,9 @@
  "personality": "gentle, kind, a little shy, very strong, loves to help",
  "look": "chubby blue-grey baby elephant with big pink-lined ears, trunk curling to one side, yellow cap",
  "voice": {
-  "name": "en-GB-MaisieNeural",
-  "rate": "-8%",
-  "pitch": "-4Hz"
+  "name": "en-US-AnaNeural",
+  "rate": "-10%",
+  "pitch": "-22Hz"
  },
  "viewbox": [
   420,

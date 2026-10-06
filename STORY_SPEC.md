@@ -18,6 +18,8 @@ If an episode for today already exists, do nothing.
 - Warm, gentle, safe. Mild problems only (lost toy, rain on picnic day, feeling left out). No violence, weapons, injury, death, scary monsters, bullying that goes unresolved, romance, brand names, real people, or copyrighted/known characters.
 - Every story resolves happily, shows kindness, and the moral is shown through actions, not lectured.
 - Simple words, short sentences, a little repetition and gentle humour. Read-aloud rhythm.
+- The narrator is a cheerful **kid** telling the story to friends, voiced by a child voice. Write narration the way an excited child would tell it: "Uh-oh!", "Guess what happened next?", "Whoooosh!", "Can you count the apples with me? One, two, three!" Ask the viewer one or two little questions per episode and pause-worthy moments. Avoid long, formal sentences.
+- The video opens with "Hi friends! Welcome to <channel>! Today's story is… <title>!" and ends with the moral plus "See you tomorrow… bye-bye!" automatically. To customise, add optional top-level `"intro"` / `"outro"` strings in the same friendly kid voice.
 - No human child characters; the cast are animals. Grown-up helpers are animals too (e.g. Nana Hoot).
 - 8–10 scenes, 380–600 words of narration in total (≈3–4 minutes). Each scene 2–5 lines.
 - Mix narrator lines and short character lines (character lines are voiced by that character and their mouth moves). A speaking character **must** be placed in that scene.
