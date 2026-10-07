@@ -4,6 +4,7 @@ import os
 import time
 from pathlib import Path
 
+from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -16,13 +17,28 @@ SCOPES = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googlea
 def _client():
     creds = Credentials(
         token=None,
-        refresh_token=os.environ["YT_REFRESH_TOKEN"],
-        client_id=os.environ["YT_CLIENT_ID"],
-        client_secret=os.environ["YT_CLIENT_SECRET"],
+        refresh_token=os.environ["YT_REFRESH_TOKEN"].strip().strip('"'),
+        client_id=os.environ["YT_CLIENT_ID"].strip().strip('"'),
+        client_secret=os.environ["YT_CLIENT_SECRET"].strip().strip('"'),
         token_uri="https://oauth2.googleapis.com/token",
         scopes=SCOPES,
     )
-    creds.refresh(Request())
+    try:
+        creds.refresh(Request())
+    except RefreshError as e:
+        msg = str(e)
+        hint = "Check the YT_CLIENT_ID / YT_CLIENT_SECRET / YT_REFRESH_TOKEN secrets."
+        if "deleted_client" in msg:
+            hint = ("The OAuth client in YT_CLIENT_ID was deleted in Google Cloud. Create a new Desktop client, "
+                    "get a NEW refresh token with it, and update all three YT_* secrets.")
+        elif "invalid_client" in msg:
+            hint = "YT_CLIENT_ID or YT_CLIENT_SECRET is wrong (typo, extra space, or from a different client)."
+        elif "invalid_grant" in msg:
+            hint = ("YT_REFRESH_TOKEN is not valid for this client. It must be made with the SAME client as "
+                    "YT_CLIENT_ID (a new client needs a new token), start with '1//', and have no quotes or spaces. "
+                    "It also stops working if access was revoked, or after 7 days if the consent screen is still "
+                    "in 'Testing' (publish the app to avoid that).")
+        raise SystemExit(f"YouTube login failed: {msg}\n  -> {hint}") from None
     return build("youtube", "v3", credentials=creds, cache_discovery=False)
 
 
