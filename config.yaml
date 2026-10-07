@@ -26,6 +26,33 @@ story:
     - respecting elders
     - managing big feelings
 
+  learning_topics:              # each episode teaches ONE of these, rotated, woven into the story
+    - counting 1 to 5
+    - counting 1 to 10
+    - colours of the rainbow
+    - shapes (circle, square, triangle, star, heart)
+    - big and small
+    - opposites (up/down, hot/cold, fast/slow)
+    - animal sounds
+    - what animals eat
+    - baby animals and their names
+    - the five senses
+    - parts of the body
+    - days of the week
+    - fruits and vegetables
+    - how plants grow
+    - weather (sun, rain, wind, snow)
+    - day and night
+    - first letters of words (A is for apple)
+    - rhyming words
+    - simple patterns (red, blue, red, blue)
+    - healthy habits (washing hands, brushing teeth)
+    - road safety (look left and right)
+    - feelings and their names
+    - sink or float
+    - insects and bugs
+    - seasons
+
 voice:
   # Narrator: a cheerful kid storyteller (free Microsoft neural voices via edge-tts).
   # Child voices: en-US-AnaNeural (American girl), en-GB-MaisieNeural (British girl).

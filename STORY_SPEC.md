@@ -17,12 +17,36 @@ If an episode for today already exists, do nothing.
 
 - Warm, gentle, safe. Mild problems only (lost toy, rain on picnic day, feeling left out). No violence, weapons, injury, death, scary monsters, bullying that goes unresolved, romance, brand names, real people, or copyrighted/known characters.
 - Every story resolves happily, shows kindness, and the moral is shown through actions, not lectured.
-- Simple words, short sentences, a little repetition and gentle humour. Read-aloud rhythm.
+- Simple words, short sentences, lots of repetition and plenty of humour (see "Make it funny" below). Read-aloud rhythm.
 - The narrator is a cheerful **kid** telling the story to friends, voiced by a child voice. Write narration the way an excited child would tell it: "Uh-oh!", "Guess what happened next?", "Whoooosh!", "Can you count the apples with me? One, two, three!" Ask the viewer one or two little questions per episode and pause-worthy moments. Avoid long, formal sentences.
 - The video opens with "Hi friends! Welcome to <channel>! Today's story is… <title>!" and ends with the moral plus "See you tomorrow… bye-bye!" automatically. To customise, add optional top-level `"intro"` / `"outro"` strings in the same friendly kid voice.
 - No human child characters; the cast are animals. Grown-up helpers are animals too (e.g. Nana Hoot).
 - 8–10 scenes, 380–600 words of narration in total (≈3–4 minutes). Each scene 2–5 lines.
 - Mix narrator lines and short character lines (character lines are voiced by that character and their mouth moves). A speaking character **must** be placed in that scene.
+
+## Every episode = FUNNY + LEARNING + KIND
+
+Each episode must make kids laugh, teach one real thing, and show the moral. Plan all three before writing.
+
+### Make it funny (at least 5 laugh moments per episode)
+Comedy for 3–8 year olds is physical, silly and surprising — never mean:
+- **Slapstick**: someone slips, bonks into a tree, gets tangled in string, a hat lands on the wrong head. Use `action: "wobble"` (dizzy), `"shake"` (surprised/giggling), `"dance"`, `"hop"` plus sound effects `bonk`, `boing`, `slide_up`/`slide_down`, `zip`, `honk`.
+- **Rule of three**: try something twice and fail the same funny way, the third time it works (or fails even sillier).
+- **Silly sounds & words**: "Ka-BOING!", "Wibble-wobble!", "SPLOOSH!", made-up words, a funny noise each character makes.
+- **Wrong guesses**: a character confidently says the wrong answer ("A triangle has… seventeen sides!") and the narrator or friend gently giggles and corrects it — kids love knowing better.
+- **Running gag** using the cast's quirks (see `characters/*.json` personality): Tumble's trunk HONK and giant sneeze, Pip mixing up big words, Nana's slipping glasses and "I'm awake!".
+- **Surprise reveal**: the "monster" is just a hiccupping frog; the mystery noise is Tumble's tummy rumbling.
+- The narrator can be cheeky: "Uh-oh… you know what happens next, don't you?"
+- Keep it kind: no laughing AT someone's looks or mistakes in a mean way, no toilet humour, no scary pranks.
+
+### Make it teach something (one topic, woven into the plot)
+- Pick ONE topic from `learning_topics` in `config.yaml` not used in the last ~10 episodes (see `learning` in `data/history.json`). Set `"learning"` in story.json, e.g. `"counting 1 to 5"`.
+- The topic must drive the plot (counting the apples to share fairly; finding the triangle-shaped key), not be a lecture bolted on.
+- Repeat the key words 3+ times. Say it, show it, let kids say it.
+- **Ask the viewer** 2–4 questions per episode ("How many apples can YOU count?"), then give them time: add `"pause": 2.5` to that line (seconds of quiet, max 5). The next line gives the answer cheerfully ("Three! You're so smart!") with a `ding` sound effect.
+- Show learning **on screen** with `popups` (see below) every time a number, colour, shape, letter or new word appears — at least 4 popups per episode.
+- Second-to-last scene is a short **"Let's remember!"** recap: the narrator quickly asks 2 questions about what was learned (with pauses + popups), then the story wraps up.
+- Facts must be correct and simple. When unsure, leave it out.
 
 ## story.json format
 
@@ -31,6 +55,7 @@ If an episode for today already exists, do nothing.
   "date": "2026-10-07",
   "title": "Pip and the Runaway Kite",          // ≤ 60 chars, catchy, includes a character name
   "theme": "sharing",
+  "learning": "counting 1 to 5",                    // ONE topic from config.yaml learning_topics
   "moral": "When we share, our happiness grows bigger.",   // one short sentence
   "description": "2–3 sentence YouTube description, no spoilers of the ending.",
   "tags": ["kids story", "bedtime story", "moral story", "sharing", "fox", "animated story"],  // 8–15
@@ -45,7 +70,10 @@ If an episode for today already exists, do nothing.
       "ambience": "birds",        // none | wind | birds | night | rain | stream | waves | fire | indoor | city
       "particles": "dust",        // none | fireflies | sparkles | leaves | snow | rain | bubbles | dust | petals
       "transition": "fade",       // into this scene: fade | fadeblack | smoothleft | smoothright | circleopen | dissolve | wipeleft
-      "sfx": [{"at": "line:0", "name": "whoosh"}],   // at "line:N" or seconds; chime | twinkle | pop | boing | whoosh | splash | knock | steps
+      "sfx": [{"at": "line:0", "name": "whoosh"}],   // at "line:N" or seconds; chime twinkle pop boing whoosh splash knock steps honk slide_up slide_down ding tada drumroll bonk zip
+      "popups": [                                    // learning cards that pop up at the top of the screen
+        {"at": "line:1", "text": "3", "sub": "three apples", "shape": "circle", "color": "#E8414E", "count": 3}
+      ],
       "layers": { "sky": "<svg>…</svg>", "mid": "<svg>…</svg>", "fore": "<svg>…</svg>" },
       "characters": [
         {"id": "pip", "x": 760, "y": 930, "height": 360, "facing": "right", "action": "bounce"},
@@ -53,12 +81,25 @@ If an episode for today already exists, do nothing.
       ],
       "narration": [
         {"text": "One sunny morning, Pip ran up Clover Hill with a brand-new red kite."},
-        {"speaker": "tumble", "text": "Wow, Pip! Can I have a turn, please?"}
+        {"speaker": "tumble", "text": "Wow, Pip! Can I have a turn, please?"},
+        {"text": "How many apples can YOU count? Let's count together!", "pause": 2.5}
       ]
     }
   ]
 }
 ```
+
+### Popups (learning cards)
+
+`{"at": "line:N" | seconds, "text": "3", "sub": "three apples", "shape": "circle", "count": 3, "color": "#E8414E", "position": "top", "dur": 4, "sound": "pop"}`
+- `text`: the key thing, max 14 characters — a number ("5"), word ("RED", "Triangle"), letter ("A a"), or short answer.
+- `sub`: optional small line under it, max 34 characters ("A is for Apple").
+- `shape`: circle | square | rectangle | triangle | star | heart | diamond | none. With `count` (1–10) it draws that many shapes in a row — perfect for counting. With no `text`, one big shape is shown.
+- `color`: hex colour (use the real colour when teaching colours!). `position`: top (default) | left | right — keep it away from where the characters are.
+- Shown from that line until 1 s after it ends (or `dur` seconds). `sound` defaults to `pop`; use `ding` for correct answers, `tada` for the recap, or `""` for none.
+
+### Character actions for comedy
+`idle`, `bounce`, `hop`, `walk`, `sleep`, plus `shake` (surprised / giggling), `wobble` (dizzy, silly), `dance` (celebrating).
 
 Vary `camera`, `time_of_day` and settings across the episode so it feels like a film. Use `transition: "fadeblack"` for a time jump (e.g. "That night…"). Add 3–6 sound effects per episode where they match the action.
 

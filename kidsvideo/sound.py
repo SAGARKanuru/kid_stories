@@ -4,6 +4,7 @@ import hashlib
 import os
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 import numpy as np
@@ -70,15 +71,20 @@ def tts(text: str, voice: str, rate: str = "+0%", pitch: str = "+0Hz", cache: Pa
     cache = cache or Path(tempfile.gettempdir())
     cache.mkdir(parents=True, exist_ok=True)
     mp3 = cache / f"tts_{key}.mp3"
+    if mp3.exists() and mp3.stat().st_size < 1000:
+        mp3.unlink()  # leftover from a failed attempt
     if not mp3.exists():
         err = None
-        for _ in range(4):
+        for attempt in range(4):
             try:
                 asyncio.run(_edge(text, voice, rate, pitch, str(mp3)))
-                if mp3.stat().st_size > 1000:
+                if mp3.exists() and mp3.stat().st_size > 1000:
                     break
             except Exception as e:  # network hiccups are common; retry
                 err = e
+            if mp3.exists():
+                mp3.unlink()
+            time.sleep(1.5 * (attempt + 1))
         else:
             if os.environ.get("ALLOW_ESPEAK") == "1":
                 return _espeak(text, pitch, cache / f"tts_{key}.wav")
@@ -314,8 +320,49 @@ def sfx(name: str, seed: int = 0) -> np.ndarray:
             k *= np.exp(-np.arange(len(k)) / 600)
             place(out, k, i * 0.38, 0.8 if i % 2 else 1.0)
         return _norm(out, 0.7)
+    if name == "honk":  # elephant trunk toot
+        t = np.arange(int(0.7 * SR)) / SR
+        f = 330 + 90 * np.minimum(1, t / 0.08) + 12 * np.sin(2 * np.pi * 7 * t)
+        ph = 2 * np.pi * np.cumsum(f) / SR
+        w = np.sign(np.sin(ph)) * 0.5 + np.sin(2 * ph) * 0.3 + np.sin(3 * ph) * 0.2
+        env = np.minimum(1, t / 0.03) * np.minimum(1, (0.7 - t) / 0.2)
+        return _norm(_fft_filter((w * env).astype(np.float32), lo=200, hi=3500), 0.8)
+    if name in ("slide_up", "slide_down"):  # slide whistle
+        t = np.arange(int(0.8 * SR)) / SR
+        a, b = (500, 1700) if name == "slide_up" else (1700, 450)
+        f = a + (b - a) * (t / t[-1]) ** 0.8 + 18 * np.sin(2 * np.pi * 6 * t)
+        env = np.minimum(1, t / 0.04) * np.minimum(1, (t[-1] - t) / 0.08)
+        return _norm(np.sin(2 * np.pi * np.cumsum(f) / SR) * env, 0.7)
+    if name == "ding":  # correct answer
+        return _norm(_bell(_hz(88), 1.6, decay=2.2) + 0.6 * _bell(_hz(95), 1.6, decay=2.4), 0.8)
+    if name == "tada":
+        out = np.zeros(int(2.0 * SR), np.float32)
+        for i, chord in enumerate([[72, 76, 79], [76, 79, 84, 88]]):
+            for m in chord:
+                place(out, _bell(_hz(m), 1.6, decay=2.0 if i else 6.0, bright=0.5), i * 0.16, 0.35)
+        return _norm(out, 0.85)
+    if name == "drumroll":
+        n = int(1.6 * SR)
+        out = np.zeros(n, np.float32)
+        t = 0.0
+        while t < 1.45:
+            k = rng.standard_normal(int(0.03 * SR)).astype(np.float32) * np.exp(-np.arange(int(0.03 * SR)) / 250)
+            place(out, _fft_filter(k, lo=150, hi=4000), t, 0.4 + 0.6 * t / 1.45)
+            t += 0.045
+        place(out, _fft_filter(rng.standard_normal(int(0.4 * SR)).astype(np.float32) * np.exp(-np.arange(int(0.4 * SR)) / 4000), lo=2000), 1.45, 0.6)
+        return _norm(out, 0.8)
+    if name == "bonk":
+        t = np.arange(int(0.35 * SR)) / SR
+        f = 260 * np.exp(-t * 4) + 120
+        return _norm(np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 12) + 0.3 * _fft_filter(rng.standard_normal(len(t)).astype(np.float32) * np.exp(-t * 60), hi=1500), 0.9)
+    if name == "zip":
+        t = np.arange(int(0.35 * SR)) / SR
+        f = 400 + 2600 * (t / t[-1]) ** 2
+        return _norm(_fft_filter((np.sin(2 * np.pi * np.cumsum(f) / SR) * np.sin(np.pi * t / t[-1]) +
+                                  0.4 * rng.standard_normal(len(t))).astype(np.float32), lo=600, hi=6000), 0.6)
     raise ValueError(f"unknown sfx '{name}'")
 
 
-SFX_NAMES = ["chime", "twinkle", "pop", "boing", "whoosh", "splash", "knock", "steps"]
+SFX_NAMES = ["chime", "twinkle", "pop", "boing", "whoosh", "splash", "knock", "steps",
+             "honk", "slide_up", "slide_down", "ding", "tada", "drumroll", "bonk", "zip"]
 AMBIENCE_NAMES = ["none", "wind", "birds", "night", "rain", "stream", "waves", "fire", "indoor", "city"]

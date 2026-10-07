@@ -16,6 +16,8 @@ CAMERAS = {"pan_left", "pan_right", "push_in", "pull_out", "drift", "still"}
 TODS = set(rig.TINTS)
 PARTICLES = {"none", "fireflies", "sparkles", "leaves", "snow", "rain", "bubbles", "dust", "petals"}
 TRANSITIONS = {"fade", "fadeblack", "smoothleft", "smoothright", "circleopen", "dissolve", "wipeleft"}
+ACTIONS = {"idle", "bounce", "hop", "walk", "sleep", "shake", "wobble", "dance"}
+SHAPES = {"none", "circle", "square", "rectangle", "triangle", "star", "heart", "diamond"}
 PARTS = ["body", "head", "eyes_open", "eyes_closed", "mouth_closed", "mouth_open"]
 
 
@@ -65,6 +67,21 @@ def validate(story: dict) -> list[str]:
         for pl in sc.get("characters", []):
             if pl.get("id") not in known:
                 errs.append(f"{tag}: unknown character '{pl.get('id')}'")
+            if pl.get("action", "idle") not in ACTIONS:
+                errs.append(f"{tag}: action '{pl.get('action')}' must be one of {sorted(ACTIONS)}")
+        for pp in sc.get("popups", []):
+            if not (pp.get("text") or pp.get("count") or pp.get("shape", "none") != "none"):
+                errs.append(f"{tag}: popup needs text, count or shape")
+            if pp.get("shape", "none") not in SHAPES:
+                errs.append(f"{tag}: popup shape must be one of {sorted(SHAPES)}")
+            if len(str(pp.get("text", ""))) > 14:
+                errs.append(f"{tag}: popup text '{pp.get('text')}' is too long (max 14 chars; put more in 'sub')")
+            if len(str(pp.get("sub", ""))) > 34:
+                errs.append(f"{tag}: popup sub '{pp.get('sub')}' is too long (max 34 chars)")
+            if int(pp.get("count", 0) or 0) > 10:
+                errs.append(f"{tag}: popup count max is 10")
+            if pp.get("sound") and pp["sound"] not in sound.SFX_NAMES:
+                errs.append(f"{tag}: popup sound must be one of {sound.SFX_NAMES}")
         if not sc.get("narration"):
             errs.append(f"{tag}: needs narration lines")
         for ln in sc.get("narration", []):
@@ -73,6 +90,10 @@ def validate(story: dict) -> list[str]:
                 errs.append(f"{tag}: unknown speaker '{ln['speaker']}'")
             if ln.get("speaker") and ln["speaker"] not in {p.get("id") for p in sc.get("characters", [])}:
                 errs.append(f"{tag}: speaker '{ln['speaker']}' talks but is not placed in the scene")
+    if not story.get("learning"):
+        errs.append("missing 'learning' (what the episode teaches, e.g. 'counting to 5')")
+    if not any(sc.get("popups") for sc in story.get("scenes", [])):
+        errs.append("no learning popups: add 'popups' to at least 2 scenes")
     if words < 250:
         errs.append(f"story is short ({words} words); aim for 380-600 words (~3-4 minutes)")
     return errs
@@ -90,7 +111,8 @@ def contact_sheet(story: dict, out: Path):
     d = ImageDraw.Draw(sheet)
     f = font(28, "SemiBold")
     for i, sc in enumerate(story["scenes"]):
-        r = SceneRenderer(sc, chars, W, H, 24, 12, {}, {}, i, camera_override="still")
+        pops = [dict(sc["popups"][0], _t0=0.0, _t1=99.0)] if sc.get("popups") else []
+        r = SceneRenderer(sc, chars, W, H, 24, 12, {}, {}, i, camera_override="still", popups=pops)
         img = r.frame(36).convert("RGB")
         x, y = 12 + (i % cols) * (W + 12), 12 + (i // cols) * (H + 50)
         sheet.paste(img, (x, y))

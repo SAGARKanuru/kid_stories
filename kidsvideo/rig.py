@@ -120,6 +120,17 @@ class Sprite:
         elif action == "walk":
             dy = -abs(math.sin(math.pi * t * 3.0)) * 0.03 * H
             tilt = 2.0 * math.sin(math.pi * t * 3.0)
+        elif action == "shake":  # surprised / giggling jitter
+            tilt = 4.0 * math.sin(2 * math.pi * t * 7.0)
+            head_angle += 5 * math.sin(2 * math.pi * t * 5.0)
+        elif action == "wobble":  # dizzy / silly rocking
+            tilt = 9.0 * math.sin(2 * math.pi * t * 0.9)
+            head_angle = -tilt * 1.3
+            dy = -abs(math.sin(2 * math.pi * t * 0.9)) * 0.02 * H
+        elif action == "dance":
+            tilt = 7.0 * math.sin(2 * math.pi * t * 1.6)
+            dy = -abs(math.sin(2 * math.pi * t * 1.6)) * 0.06 * H
+            head_angle = -tilt
         elif action == "sleep":
             head_angle = 6 + 1.5 * math.sin(2 * math.pi * t / 4.0)
             breathe *= 2.2

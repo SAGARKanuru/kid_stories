@@ -23,7 +23,7 @@ def pending_episodes():
 def record_history(ep: Path, story: dict, info: dict | None):
     path = ROOT / "data" / "history.json"
     hist = json.loads(path.read_text()) if path.exists() else []
-    hist.append({"date": story.get("date", ep.name), "title": story["title"], "theme": story.get("theme", ""),
+    hist.append({"date": story.get("date", ep.name), "title": story["title"], "theme": story.get("theme", ""), "learning": story.get("learning", ""),
                  "moral": story["moral"], "cast": sorted({pl["id"] for sc in story["scenes"] for pl in sc.get("characters", [])}),
                  "summary": story["description"], "video": (info or {}).get("url")})
     path.write_text(json.dumps(hist, indent=1))
@@ -45,7 +45,8 @@ def main():
     for ep in eps:
         story = json.loads((ep / "story.json").read_text())
         errs = validate(story)
-        hard = [e for e in errs if not e.startswith("story is short")]
+        soft = ("story is short", "missing 'learning'", "no learning popups")
+        hard = [e for e in errs if not e.startswith(soft)]
         if hard:
             print(f"✗ {ep.name}: story.json has problems:\n  - " + "\n  - ".join(hard))
             failed = True

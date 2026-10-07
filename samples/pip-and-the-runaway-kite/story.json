@@ -51,10 +51,14 @@
    ],
    "narration": [
     {
-     "text": "One sunny morning, Pip the little fox ran up Clover Hill with a brand-new red kite."
+     "text": "One sunny morning, Pip the little fox zoomed up Clover Hill with a brand-new red kite."
     },
     {
-     "text": "The kite danced high in the sky, and Pip laughed with joy."
+     "text": "The kite had a long tail with little blue bows. Let's count them together! One... two... three!"
+    },
+    {
+     "speaker": "pip",
+     "text": "Three bows! Super-duper!"
     },
     {
      "speaker": "tumble",
@@ -65,7 +69,18 @@
      "text": "No! It's my kite. I want to fly it all by myself."
     },
     {
-     "text": "Tumble's ears drooped, and he looked down at his feet."
+     "text": "Tumble's ears drooped. Uh-oh. That wasn't very kind, was it?"
+    }
+   ],
+   "popups": [
+    {
+     "at": "line:1",
+     "text": "3",
+     "sub": "three blue bows",
+     "shape": "triangle",
+     "color": "#2F9BE8",
+     "count": 3,
+     "position": "left"
     }
    ]
   },
@@ -87,28 +102,55 @@
      "y": 905,
      "height": 360,
      "facing": "right",
-     "action": "hop"
+     "action": "wobble"
     }
    ],
    "sfx": [
     {
      "at": "line:0",
      "name": "whoosh"
+    },
+    {
+     "at": "line:3",
+     "name": "boing"
+    },
+    {
+     "at": "line:3",
+     "name": "bonk"
     }
    ],
    "narration": [
     {
-     "text": "Suddenly, whoosh! A big gust of wind tugged the string right out of Pip's paws."
+     "text": "Suddenly, WHOOSH! A big wind tugged the string right out of Pip's paws."
     },
     {
-     "text": "The kite flew over the stream and got stuck at the top of the tallest tree."
+     "text": "The kite flew over the stream and got stuck at the very top of the tallest tree."
     },
     {
      "speaker": "pip",
-     "text": "Oh no! My kite! I can't reach it!"
+     "text": "Oh no! My kite! Don't worry, I'll just jump and get it!"
     },
     {
-     "text": "Pip jumped and jumped, but the branches were much too high."
+     "text": "Boing! Too low. Boing! Still too low. Ka-BONK! Pip bumped right into the tree trunk!"
+    },
+    {
+     "text": "How many times did Pip jump? Can you count?",
+     "pause": 2.5
+    },
+    {
+     "text": "Three times! And now he's all wibble-wobbly!"
+    }
+   ],
+   "popups": [
+    {
+     "at": "line:5",
+     "text": "3",
+     "sub": "three jumps",
+     "shape": "star",
+     "color": "#F2A516",
+     "count": 3,
+     "sound": "ding",
+     "position": "left"
     }
    ]
   },
@@ -129,7 +171,7 @@
      "y": 915,
      "height": 360,
      "facing": "right",
-     "action": "bounce"
+     "action": "shake"
     },
     {
      "id": "tumble",
@@ -146,20 +188,28 @@
      "name": "steps"
     },
     {
+     "at": "line:1",
+     "name": "honk"
+    },
+    {
+     "at": "line:2",
+     "name": "slide_up"
+    },
+    {
      "at": "line:3",
      "name": "pop"
     }
    ],
    "narration": [
     {
-     "text": "Then Pip heard gentle footsteps. It was Tumble!"
+     "text": "Then Pip heard big, stompy footsteps. It was Tumble!"
     },
     {
      "speaker": "tumble",
-     "text": "Don't worry, Pip. I can help!"
+     "text": "Don't worry, Pip. I can help! Oopsie-trunk... HONK!"
     },
     {
-     "text": "Tumble stretched his long trunk up, up, up... and lifted the kite down safely."
+     "text": "Tumble stretched his long trunk up, up, UP... and lifted the kite down safely."
     },
     {
      "speaker": "pip",
@@ -185,7 +235,7 @@
      "y": 930,
      "height": 360,
      "facing": "right",
-     "action": "bounce"
+     "action": "dance"
     },
     {
      "id": "tumble",
@@ -204,28 +254,40 @@
      "action": "idle"
     }
    ],
-   "sfx": [
-    {
-     "at": "line:3",
-     "name": "chime"
-    }
-   ],
+   "sfx": [],
    "narration": [
     {
-     "text": "That evening, the two friends flew the red kite together, taking turns on Clover Hill."
+     "text": "That evening, the friends took turns flying the red kite on Clover Hill."
     },
     {
      "speaker": "nana",
-     "text": "Look at you two! A happy thing grows even bigger when we share it."
+     "text": "Hoo-hoo-HOO! Look at you two! A happy thing grows bigger when we share it."
+    },
+    {
+     "text": "Let's remember! How many blue bows were on the kite?",
+     "pause": 2.5
     },
     {
      "speaker": "pip",
-     "text": "You're right, Nana Hoot. Sharing is the best!"
+     "text": "Three! One, two, three! Sharing is the best!"
     },
     {
      "text": "And the little red kite flew higher than ever before."
     }
+   ],
+   "popups": [
+    {
+     "at": "line:3",
+     "text": "1 2 3",
+     "sub": "Great counting!",
+     "shape": "heart",
+     "color": "#E8414E",
+     "count": 3,
+     "sound": "tada",
+     "position": "left"
+    }
    ]
   }
- ]
+ ],
+ "learning": "counting 1 to 3"
 }

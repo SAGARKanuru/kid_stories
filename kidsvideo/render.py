@@ -98,6 +98,82 @@ def caption_image(text, W, talk=False):
     return img
 
 
+def _hex(c, default=(232, 65, 78)):
+    try:
+        c = c.lstrip("#")
+        return tuple(int(c[i:i + 2], 16) for i in (0, 2, 4))
+    except Exception:
+        return default
+
+
+def _shape(d, kind, cx, cy, r, col):
+    dark = tuple(max(0, int(v * 0.7)) for v in col)
+    if kind == "circle":
+        d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=col, outline=dark, width=max(2, r // 10))
+    elif kind == "square":
+        d.rounded_rectangle((cx - r, cy - r, cx + r, cy + r), radius=r // 5, fill=col, outline=dark, width=max(2, r // 10))
+    elif kind == "rectangle":
+        d.rounded_rectangle((cx - r * 1.4, cy - r * 0.8, cx + r * 1.4, cy + r * 0.8), radius=r // 6, fill=col, outline=dark, width=max(2, r // 10))
+    elif kind == "triangle":
+        d.polygon([(cx, cy - r), (cx + r * 1.05, cy + r * 0.8), (cx - r * 1.05, cy + r * 0.8)], fill=col, outline=dark, width=max(2, r // 10))
+    elif kind == "star":
+        pts = []
+        for i in range(10):
+            a = -math.pi / 2 + i * math.pi / 5
+            rr = r if i % 2 == 0 else r * 0.45
+            pts.append((cx + rr * math.cos(a), cy + rr * math.sin(a)))
+        d.polygon(pts, fill=col, outline=dark, width=max(2, r // 12))
+    elif kind == "heart":
+        d.ellipse((cx - r, cy - r * 0.75, cx, cy + r * 0.2), fill=col)
+        d.ellipse((cx, cy - r * 0.75, cx + r, cy + r * 0.2), fill=col)
+        d.polygon([(cx - r * 0.97, cy - r * 0.15), (cx + r * 0.97, cy - r * 0.15), (cx, cy + r)], fill=col)
+    elif kind == "diamond":
+        d.polygon([(cx, cy - r), (cx + r * 0.75, cy), (cx, cy + r), (cx - r * 0.75, cy)], fill=col, outline=dark, width=max(2, r // 10))
+
+
+def learn_card(spec, W):
+    """A pop-up 'learning card': shapes/counting row, big word or number, small caption."""
+    s = W / 1920
+    col = _hex(spec.get("color", "#E8414E"))
+    shape, count = spec.get("shape", "none"), int(spec.get("count", 0) or 0)
+    text, sub = str(spec.get("text", "")), str(spec.get("sub", ""))
+    big = font(int((150 if len(text) <= 3 else 100 if len(text) <= 8 else 74) * s), "Bold")
+    small = font(int(46 * s), "SemiBold")
+    pad = int(36 * s)
+    icons_h = 0
+    n_icons = min(count, 10) if count else (1 if shape != "none" and not text else 0)
+    r = int((54 if n_icons <= 5 else 40) * s)
+    if n_icons:
+        icons_h = 2 * r + int(18 * s)
+    tw = big.getlength(text) if text else 0
+    sw = small.getlength(sub) if sub else 0
+    iw = n_icons * (2 * r + int(16 * s))
+    Wc = int(max(tw, sw, iw, 280 * s) + 2 * pad)
+    th = int(big.size * 1.08) if text else 0
+    sh_ = int(small.size * 1.3) if sub else 0
+    Hc = int(pad * 1.6 + icons_h + th + sh_)
+    img = Image.new("RGBA", (Wc + 40, Hc + 40), (0, 0, 0, 0))
+    shadow = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    ImageDraw.Draw(shadow).rounded_rectangle((24, 30, Wc + 16, Hc + 22), radius=int(40 * s), fill=(30, 15, 50, 110))
+    img.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(10)))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle((20, 20, Wc + 20, Hc + 20), radius=int(40 * s), fill=(255, 252, 244, 248),
+                        outline=col, width=max(4, int(8 * s)))
+    y = 20 + int(pad * 0.8)
+    if n_icons:
+        x0 = 20 + (Wc - iw) / 2 + r + int(8 * s)
+        for i in range(n_icons):
+            _shape(d, shape if shape != "none" else "star", int(x0 + i * (2 * r + int(16 * s))), y + r, r, col)
+        y += icons_h
+    if text:
+        d.text((20 + (Wc - tw) / 2, y - big.size * 0.08), text, font=big, fill=col,
+               stroke_width=max(2, int(4 * s)), stroke_fill=(255, 255, 255))
+        y += th
+    if sub:
+        d.text((20 + (Wc - sw) / 2, y), sub, font=small, fill=(60, 40, 80))
+    return img
+
+
 # ====================================================================== particles
 class Particles:
     def __init__(self, kind, W, H, seed):
@@ -201,9 +277,10 @@ def grade_overlay(W, H, tod):
 class SceneRenderer:
     def __init__(self, scene: dict, characters: dict, W: int, H: int, fps: int, dur: float,
                  mouths: dict, talk: dict, seed: int, overlay: Image.Image | None = None, overlay_pop=False,
-                 camera_override: str | None = None, captions=None):
+                 camera_override: str | None = None, captions=None, popups=None):
         self.W, self.H, self.fps, self.dur = W, H, fps, dur
         self.captions = captions or []
+        self.popups = [(p["_t0"], p["_t1"], learn_card(p, W), p.get("position", "top")) for p in (popups or [])]
         self._cap_cache = {}
         self.scene = scene
         self.tod = scene.get("time_of_day", "day")
@@ -315,6 +392,28 @@ class SceneRenderer:
                 if k != 1.0:
                     ov = ov.resize((max(1, int(ov.width * k)), max(1, int(ov.height * k))), Image.BILINEAR)
             fr.alpha_composite(ov, ((self.W - ov.width) // 2, (self.H - ov.height) // 2))
+        for (p0, p1, card, pos) in self.popups:
+            if p0 <= t < p1:
+                q = (t - p0) / 0.45
+                k = 1 + 2.4 * (q - 1) ** 3 + 1.4 * (q - 1) ** 2 if q < 1 else 1.0  # ease-out-back
+                fade = min(1.0, (p1 - t) / 0.3)
+                k *= 0.85 + 0.15 * fade
+                c = card
+                if abs(k - 1) > 0.01:
+                    c = card.resize((max(1, int(card.width * k)), max(1, int(card.height * k))), Image.BILINEAR)
+                if fade < 1:
+                    a = c.getchannel("A").point(lambda v: int(v * fade))
+                    c = c.copy()
+                    c.putalpha(a)
+                bob = int(6 * self.H / 1080 * math.sin(2 * math.pi * (t - p0) / 1.6))
+                cy = int(self.H * 0.05) + (card.height - c.height) // 2 + bob
+                if pos == "left":
+                    cx = int(self.W * 0.04) + (card.width - c.width) // 2
+                elif pos == "right":
+                    cx = self.W - int(self.W * 0.04) - card.width + (card.width - c.width) // 2
+                else:
+                    cx = (self.W - c.width) // 2
+                fr.alpha_composite(c, (max(0, cx), max(0, cy)))
         for k, (c0, c1, text, talk) in enumerate(self.captions):
             if c0 <= t < c1:
                 if k not in self._cap_cache:
@@ -327,11 +426,11 @@ class SceneRenderer:
 
 def _render_segment(job):
     """Worker: render one segment to an mp4 (video only)."""
-    (scene, characters, W, H, fps, dur, mouths, talk, seed, out, overlay_spec, cam, caps) = job
+    (scene, characters, W, H, fps, dur, mouths, talk, seed, out, overlay_spec, cam, caps, pops) = job
     overlay, pop = None, False
     if overlay_spec:
         overlay, pop = _build_overlay(overlay_spec, W, H), overlay_spec.get("pop", False)
-    r = SceneRenderer(scene, characters, W, H, fps, dur, mouths, talk, seed, overlay, pop, cam, caps)
+    r = SceneRenderer(scene, characters, W, H, fps, dur, mouths, talk, seed, overlay, pop, cam, caps, pops)
     n = int(round(dur * fps))
     proc = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
                              "-s", f"{W}x{H}", "-r", str(fps), "-i", "-", "-c:v", "libx264", "-preset", "veryfast",
@@ -411,8 +510,24 @@ def build_timeline(story, cfg, characters, cache):
             ln["_start"], ln["_audio"] = cur, a
             ln["_dur"] = len(a) / sound.SR
             cur += ln["_dur"]
+            cur += min(5.0, max(0.0, float(ln.get("pause", 0) or 0)))  # time for kids to answer
             prev = ln.get("speaker")
-        seg["dur"] = max(seg["min"], cur + seg["tail"])
+        lines = seg["lines"]
+        pops = []
+        for p in (seg["scene"].get("popups", []) if seg["kind"] == "scene" else []):
+            p = dict(p)
+            at = p.get("at", 0)
+            if isinstance(at, str) and at.startswith("line:") and lines:
+                ln = lines[min(int(at.split(":")[1]), len(lines) - 1)]
+                p["_t0"] = ln["_start"] + 0.2
+                default_end = ln["_start"] + ln["_dur"] + float(ln.get("pause", 0) or 0) + 1.0
+            else:
+                p["_t0"] = float(at)
+                default_end = p["_t0"] + 4.0
+            p["_t1"] = p["_t0"] + float(p["dur"]) if p.get("dur") else max(p["_t0"] + 3.0, default_end)
+            pops.append(p)
+        seg["popups"] = pops
+        seg["dur"] = max(seg["min"], cur + seg["tail"], *[p["_t1"] + 0.3 for p in pops])
         seg["start"] = t
         t += seg["dur"]
     total = t
@@ -455,6 +570,13 @@ def mix_audio(segs, total, cfg, seed, mood):
         if kind != "none":
             a = sound.ambience(kind, seg["dur"] + 1.6, seed + k)
             sound.place(amb, a, max(0, seg["start"] - 0.8))
+        for p in seg.get("popups", []):
+            snd = p.get("sound", "pop")
+            if snd:
+                try:
+                    sound.place(fx, sound.sfx(snd, seed + k), seg["start"] + p["_t0"], 0.8)
+                except ValueError as e:
+                    print("warning:", e)
         for ev in seg.get("sfx", []):
             at = ev.get("at", 0)
             if isinstance(at, str) and at.startswith("line:"):
@@ -574,7 +696,7 @@ def render_episode(ep_dir: Path, workers: int | None = None, preview_only=False)
             cam = cams[k % len(cams)]
         caps = segment_captions(seg) if vc.get("captions", True) else []
         jobs.append((seg["scene"], characters, W, H, fps, dur, seg["mouths"], seg["talk"], seed + k,
-                     work / f"seg_{k:02d}.mp4", ov, cam, caps))
+                     work / f"seg_{k:02d}.mp4", ov, cam, caps, seg.get("popups", [])))
     workers = workers or max(1, min(len(jobs), os.cpu_count() or 2))
     with ProcessPoolExecutor(max_workers=workers) as ex:
         outs = list(ex.map(_render_segment, jobs))
