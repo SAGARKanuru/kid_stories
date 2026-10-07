@@ -14,7 +14,7 @@ from .render import SceneRenderer, font, load_config, make_thumbnail
 
 CAMERAS = {"pan_left", "pan_right", "push_in", "pull_out", "drift", "still"}
 TODS = set(rig.TINTS)
-PARTICLES = {"none", "fireflies", "sparkles", "leaves", "snow", "rain", "bubbles", "dust", "petals"}
+PARTICLES = {"none", "fireflies", "sparkles", "leaves", "snow", "rain", "bubbles", "dust", "petals", "confetti"}
 TRANSITIONS = {"fade", "fadeblack", "smoothleft", "smoothright", "circleopen", "dissolve", "wipeleft"}
 ACTIONS = {"idle", "bounce", "hop", "walk", "sleep", "shake", "wobble", "dance"}
 SHAPES = {"none", "circle", "square", "rectangle", "triangle", "star", "heart", "diamond"}

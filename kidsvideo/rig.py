@@ -3,7 +3,7 @@ import json
 import math
 import random
 
-from PIL import Image, ImageDraw, ImageFilter, ImageOps
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
 from . import ROOT, svgtools
 
@@ -35,6 +35,40 @@ def _tint(img: Image.Image, tint) -> Image.Image:
     return Image.merge("RGBA", (r, g, b, a))
 
 
+OUTLINE = (52, 30, 72, 255)
+
+
+def _outline(img: Image.Image, px: int) -> Image.Image:
+    """Cartoon ink outline: dilate the alpha and put a dark rim behind the artwork."""
+    if px < 1:
+        return img
+    a = img.getchannel("A").point(lambda v: 255 if v > 40 else 0)
+    k = 2 * px + 1
+    grown = a.filter(ImageFilter.MaxFilter(k if k % 2 else k + 1)).filter(ImageFilter.GaussianBlur(0.6))
+    rim = Image.new("RGBA", img.size, OUTLINE)
+    rim.putalpha(grown)
+    rim.alpha_composite(img)
+    return rim
+
+
+def _happy_eyes(closed: Image.Image) -> Image.Image:
+    """Turn closed-eye arcs (smile-shaped) into happy upside-down arcs, eye by eye."""
+    out = Image.new("RGBA", closed.size, (0, 0, 0, 0))
+    a = closed.getchannel("A")
+    bbox = a.getbbox()
+    if not bbox:
+        return out
+    mid = (bbox[0] + bbox[2]) // 2
+    for box in ((bbox[0], bbox[1], mid, bbox[3]), (mid, bbox[1], bbox[2], bbox[3])):
+        piece = closed.crop(box)
+        b = piece.getbbox()
+        if not b:
+            continue
+        eye = piece.crop(b)
+        out.alpha_composite(ImageOps.flip(eye), (box[0] + b[0], box[1] + b[1] - eye.height // 3))
+    return out
+
+
 class Sprite:
     """One character placed in one scene at a fixed size."""
 
@@ -47,20 +81,27 @@ class Sprite:
         self.W, self.H = W, H
         parts = char["parts"]
         tint = TINTS.get(time_of_day, TINTS["day"])
+        ol = max(2, round(H / 120))
 
         def r(name):
-            return _tint(svgtools.render(parts[name], W, H, vb_w, vb_h), tint)
+            im = svgtools.render(parts[name], W, H, vb_w, vb_h)
+            a = im.getchannel("A")
+            im = ImageEnhance.Color(im.convert("RGB")).enhance(1.15).convert("RGBA")
+            im.putalpha(a)
+            return _tint(im, tint)
 
-        body = r("body")
-        head = r("head")
+        body = _outline(r("body"), ol)
+        head = _outline(r("head"), ol)
+        eyes = {"open": r("eyes_open"), "closed": r("eyes_closed")}
+        eyes["happy"] = _happy_eyes(eyes["closed"])
+        mouths = {False: r("mouth_closed"), True: r("mouth_open")}
         heads = {}
-        for eyes in ("eyes_open", "eyes_closed"):
-            for mouth in ("mouth_closed", "mouth_open"):
+        for ek, ev in eyes.items():
+            for mk, mv in mouths.items():
                 im = head.copy()
-                im.alpha_composite(r(eyes))
-                im.alpha_composite(r(mouth))
-                heads[(eyes == "eyes_closed", mouth == "mouth_open")] = im
-        # Crop head layers to their bounding box (+ margin) so rotation is cheap.
+                im.alpha_composite(ev)
+                im.alpha_composite(mv)
+                heads[(ek, mk)] = im
         bbox = None
         for im in heads.values():
             b = im.getbbox()
@@ -82,8 +123,8 @@ class Sprite:
             pivot = ((bbox[2] - bbox[0]) - pivot[0], pivot[1])
         self.body, self.heads, self.pivot = body, heads, pivot
         self.mirror = facing == "left"
+        self.margin = int(0.25 * max(W, H))
 
-        # Soft contact shadow.
         sw, sh = int(W * 0.62), max(6, int(H * 0.06))
         sh_img = Image.new("RGBA", (sw + 40, sh + 40), (0, 0, 0, 0))
         ImageDraw.Draw(sh_img).ellipse((20, 20, 20 + sw, 20 + sh), fill=(20, 15, 40, 95))
@@ -106,31 +147,47 @@ class Sprite:
         return False
 
     def draw(self, layer: Image.Image, t: float, x: float, y: float, action: str = "idle",
-             talking: float = 0.0, mouth_open: bool = False, offset=(0, 0)):
-        """Composite the character onto `layer` with feet at (x, y) in layer pixels."""
+             talking: float = 0.0, mouth_open: bool = False, offset=(0, 0), appear: float = 1.0):
+        """Composite the character onto `layer` with feet at (x, y) in layer pixels.
+        appear: 0..1 pop-in progress (1 = fully visible)."""
         H = self.H
         dy, tilt = 0.0, 0.0
+        sx = sy = 1.0
         head_angle = 2.2 * math.sin(2 * math.pi * t / 3.3 + self.phase)
         breathe = 0.006 * H * math.sin(2 * math.pi * t / 2.6 + self.phase)
+        happy = False
+
+        def jump(freq, height):
+            ph = (t * freq) % 1.0                      # 0..1 one jump cycle
+            h = math.sin(math.pi * ph)                  # 0 ground, 1 top
+            v = math.cos(math.pi * ph)                  # +up / -down speed
+            # stretch while fast in the air, squash right at take-off/landing
+            st = 0.07 * abs(v) * h * 3 if h > 0.12 else 0.0
+            sq = 0.10 * (1 - h / 0.12) if h <= 0.12 else 0.0
+            return -h * height * H, 1 - st * 0.6 + sq, 1 + st - sq
+
         if action == "bounce":
-            dy = -abs(math.sin(math.pi * t * 1.7)) * 0.045 * H
+            dy, sx, sy = jump(0.85, 0.05)
             head_angle *= 1.6
+            happy = True
         elif action == "hop":
-            dy = -abs(math.sin(math.pi * t * 1.05)) * 0.13 * H
+            dy, sx, sy = jump(0.55, 0.14)
         elif action == "walk":
             dy = -abs(math.sin(math.pi * t * 3.0)) * 0.03 * H
             tilt = 2.0 * math.sin(math.pi * t * 3.0)
-        elif action == "shake":  # surprised / giggling jitter
+        elif action == "shake":
             tilt = 4.0 * math.sin(2 * math.pi * t * 7.0)
             head_angle += 5 * math.sin(2 * math.pi * t * 5.0)
-        elif action == "wobble":  # dizzy / silly rocking
+            sy = 1 + 0.02 * math.sin(2 * math.pi * t * 7.0)
+        elif action == "wobble":
             tilt = 9.0 * math.sin(2 * math.pi * t * 0.9)
             head_angle = -tilt * 1.3
             dy = -abs(math.sin(2 * math.pi * t * 0.9)) * 0.02 * H
         elif action == "dance":
-            tilt = 7.0 * math.sin(2 * math.pi * t * 1.6)
-            dy = -abs(math.sin(2 * math.pi * t * 1.6)) * 0.06 * H
+            dy, sx, sy = jump(0.8, 0.06)
+            tilt = 7.0 * math.sin(2 * math.pi * t * 0.8)
             head_angle = -tilt
+            happy = True
         elif action == "sleep":
             head_angle = 6 + 1.5 * math.sin(2 * math.pi * t / 4.0)
             breathe *= 2.2
@@ -138,30 +195,38 @@ class Sprite:
             head_angle += talking * (3.5 * math.sin(2 * math.pi * t * 1.4) + 2.0 * math.sin(2 * math.pi * t * 3.1))
         if self.mirror:
             head_angle, tilt = -head_angle, -tilt
+        if appear < 1.0:  # elastic pop-in
+            q = max(0.0, appear)
+            k = 1 + 2.7 * (q - 1) ** 3 + 1.7 * (q - 1) ** 2
+            sx, sy = sx * max(0.01, k), sy * max(0.01, k)
 
         ox, oy = offset
-        bx = int(round(x - self.W / 2 + ox))
-        by = int(round(y - H + dy + breathe * 0.5 + oy))
-
-        # Shadow stays on the ground and shrinks while airborne.
         lift = min(1.0, -dy / (0.15 * H)) if dy < 0 else 0.0
         sh = self.shadow
-        if lift > 0.02:
-            sh = sh.resize((max(4, int(sh.width * (1 - 0.35 * lift))), max(4, int(sh.height * (1 - 0.35 * lift)))))
+        if lift > 0.02 or appear < 1:
+            f = (1 - 0.35 * lift) * min(1.0, max(0.05, appear))
+            sh = sh.resize((max(4, int(sh.width * f)), max(4, int(sh.height * f))))
         _paste(layer, sh, int(x - sh.width / 2 + ox), int(y - sh.height / 2 + oy))
 
+        # compose the character on its own canvas, then squash/stretch around the feet
+        m = self.margin
+        cv = Image.new("RGBA", (self.W + 2 * m, H + 2 * m), (0, 0, 0, 0))
         body = self.body
         if abs(tilt) > 0.3:
             body = body.rotate(tilt, resample=Image.BICUBIC, center=(self.W / 2, H))
-        _paste(layer, body, bx, by)
-
+        cv.alpha_composite(body, (m, m))
         blink = self.is_blinking(t) or action == "sleep"
-        head = self.heads[(blink, mouth_open and action != "sleep")]
+        eye = "closed" if blink else ("happy" if happy and not talking else "open")
+        head = self.heads[(eye, bool(mouth_open and action != "sleep"))]
         if abs(head_angle) > 0.2:
             head = head.rotate(head_angle, resample=Image.BICUBIC, center=self.pivot)
-        hx = bx + self.head_origin[0]
-        hy = by + self.head_origin[1] - int(breathe * 0.5)
-        _paste(layer, head, hx, hy)
+        cv.alpha_composite(head, (m + self.head_origin[0], m + self.head_origin[1] - int(breathe * 0.5)))
+        feet_x, feet_y = m + self.W / 2, m + H
+        if abs(sx - 1) > 0.004 or abs(sy - 1) > 0.004:
+            nw, nh = max(1, int(cv.width * sx)), max(1, int(cv.height * sy))
+            cv = cv.resize((nw, nh), Image.BILINEAR)
+            feet_x, feet_y = feet_x * sx, feet_y * sy
+        _paste(layer, cv, int(round(x - feet_x + ox)), int(round(y - feet_y + dy + breathe * 0.5 + oy)))
 
 
 def _paste(dst: Image.Image, src: Image.Image, x: int, y: int):

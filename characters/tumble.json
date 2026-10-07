@@ -6,8 +6,9 @@
  "look": "chubby blue-grey baby elephant with big pink-lined ears, trunk curling to one side, yellow cap",
  "voice": {
   "name": "en-US-AnaNeural",
-  "rate": "-10%",
-  "pitch": "-22Hz"
+  "rate": "-12%",
+  "pitch": "+0Hz",
+  "shift": -2.5
  },
  "viewbox": [
   420,

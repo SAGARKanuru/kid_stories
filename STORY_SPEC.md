@@ -68,7 +68,7 @@ Comedy for 3–8 year olds is physical, silly and surprising — never mean:
       "time_of_day": "morning",   // day | morning | sunset | night | indoor
       "camera": "pan_right",      // pan_right | pan_left | push_in | pull_out | drift | still
       "ambience": "birds",        // none | wind | birds | night | rain | stream | waves | fire | indoor | city
-      "particles": "dust",        // none | fireflies | sparkles | leaves | snow | rain | bubbles | dust | petals
+      "particles": "dust",        // none | fireflies | sparkles | leaves | snow | rain | bubbles | dust | petals | confetti
       "transition": "fade",       // into this scene: fade | fadeblack | smoothleft | smoothright | circleopen | dissolve | wipeleft
       "sfx": [{"at": "line:0", "name": "whoosh"}],   // at "line:N" or seconds; chime twinkle pop boing whoosh splash knock steps honk slide_up slide_down ding tada drumroll bonk zip
       "popups": [                                    // learning cards that pop up at the top of the screen
@@ -97,6 +97,17 @@ Comedy for 3–8 year olds is physical, silly and surprising — never mean:
 - `shape`: circle | square | rectangle | triangle | star | heart | diamond | none. With `count` (1–10) it draws that many shapes in a row — perfect for counting. With no `text`, one big shape is shown.
 - `color`: hex colour (use the real colour when teaching colours!). `position`: top (default) | left | right — keep it away from where the characters are.
 - Shown from that line until 1 s after it ends (or `dur` seconds). `sound` defaults to `pop`; use `ding` for correct answers, `tada` for the recap, or `""` for none.
+
+### Make it look attractive
+The renderer already adds bold cartoon outlines, saturated colours, squash-and-stretch, happy ^‿^ eyes on `bounce`/`dance`, a branded animated intro, confetti at the end, sparkle bursts on popups and a camera shake on `bonk`/`boing`/`honk`/`splash`. Your job:
+- Paint **bright, cheerful, high-contrast** scenes: clear blue skies, sunny yellows, juicy greens, pops of pink/orange/purple. Avoid grey, brown-heavy or muddy palettes; even night scenes are rich blue/purple with glowing warm lights.
+- Make every scene visually different (new place, time of day or camera) and full of fun detail kids can spot (a snail on a fence, a bird's nest, a rainbow, polka-dot mushrooms).
+- Keep characters big and central (heights near the top of their range) — kids watch faces.
+- Make entrances fun: `"enter": "pop"` with `"start": <seconds>` makes a character spring into the scene (pair with `pop` or `boing` sfx).
+- Use `bounce`/`dance` for happy moments (shows happy eyes), `hop`/`wobble`/`shake` for comedy.
+
+### Narration that sounds great for kids
+The text-to-speech reads punctuation, so write for the ear: short sentences, lots of "!" for excitement, "..." for a suspense pause, sound words in caps ("BOING!", "SPLOOSH!"), and stretch fun words ("Whoooosh!", "Yummmmy!"). Avoid brackets, emojis, abbreviations and long numbers.
 
 ### Character actions for comedy
 `idle`, `bounce`, `hop`, `walk`, `sleep`, plus `shake` (surprised / giggling), `wobble` (dizzy, silly), `dance` (celebrating).

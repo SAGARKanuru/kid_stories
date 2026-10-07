@@ -6,8 +6,9 @@
  "look": "plump brown owl with cream face disc, ear tufts, round gold glasses, lilac knitted shawl, orange feet",
  "voice": {
   "name": "en-GB-SoniaNeural",
-  "rate": "-12%",
-  "pitch": "-6Hz"
+  "rate": "-10%",
+  "pitch": "+0Hz",
+  "shift": 1.5
  },
  "viewbox": [
   400,

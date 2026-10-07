@@ -59,8 +59,9 @@ voice:
   # Grown-up options: en-IN-NeerjaNeural (Indian English), en-US-JennyNeural, en-GB-SoniaNeural.
   # Run the "Voice samples" workflow in GitHub Actions to hear them before changing.
   narrator: "en-US-AnaNeural"
-  rate: "+0%"
-  pitch: "+4Hz"
+  rate: "-6%"        # a little slower so 3-5 year olds can follow
+  pitch: "+0Hz"
+  shift: 1.0         # semitones of "cartoon child" pitch+timbre shift (0 = natural voice; try 0 to 2)
 
 video:
   width: 1920

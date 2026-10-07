@@ -73,6 +73,8 @@ def tts(text: str, voice: str, rate: str = "+0%", pitch: str = "+0Hz", cache: Pa
     mp3 = cache / f"tts_{key}.mp3"
     if mp3.exists() and mp3.stat().st_size < 1000:
         mp3.unlink()  # leftover from a failed attempt
+    if not mp3.exists() and os.environ.get("TTS_OFFLINE") == "1":  # local testing without network
+        return _espeak(text, pitch, cache / f"tts_{key}.wav")
     if not mp3.exists():
         err = None
         for attempt in range(4):
@@ -106,6 +108,25 @@ def _espeak(text, pitch, wav):
         pass
     subprocess.run(["espeak-ng", "-v", "en-us", "-s", "150", "-p", str(p), "-w", str(wav), text], check=True)
     return decode(wav) * 0.9
+
+
+def voice_fx(a: np.ndarray, shift: float = 0.0, bright: bool = True) -> np.ndarray:
+    """Make a voice sound more like a cartoon child.
+    shift: semitones; raising pitch AND formants makes a voice sound smaller/younger (+), lowering makes it
+    chubbier/goofier (-). bright: gentle presence lift + warmth so speech is clear on phone/TV speakers."""
+    if len(a) == 0 or (not shift and not bright):
+        return a
+    chain = []
+    if shift:
+        f = 2 ** (float(shift) / 12)
+        chain += [f"asetrate={int(SR * f)}", f"aresample={SR}", f"atempo={1 / f:.5f}"]
+    if bright:
+        chain += ["highpass=f=90", "equalizer=f=250:t=q:w=1:g=-2", "equalizer=f=3200:t=q:w=1.2:g=3",
+                  "equalizer=f=9000:t=h:w=1:g=1.5", "acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120"]
+    out = subprocess.run(["ffmpeg", "-v", "error", "-f", "f32le", "-ar", str(SR), "-ac", "1", "-i", "-",
+                          "-af", ",".join(chain), "-f", "f32le", "-ar", str(SR), "-ac", "1", "-"],
+                         input=np.asarray(a, np.float32).tobytes(), capture_output=True, check=True).stdout
+    return np.frombuffer(out, dtype=np.float32).copy()
 
 
 def envelope(a: np.ndarray, fps: int) -> np.ndarray:
@@ -360,9 +381,19 @@ def sfx(name: str, seed: int = 0) -> np.ndarray:
         f = 400 + 2600 * (t / t[-1]) ** 2
         return _norm(_fft_filter((np.sin(2 * np.pi * np.cumsum(f) / SR) * np.sin(np.pi * t / t[-1]) +
                                   0.4 * rng.standard_normal(len(t))).astype(np.float32), lo=600, hi=6000), 0.6)
+    if name == "jingle":  # channel intro sting
+        out = np.zeros(int(3.2 * SR), np.float32)
+        notes = [(72, 0.0), (76, 0.14), (79, 0.28), (84, 0.42), (81, 0.62), (84, 0.76), (88, 0.95)]
+        for m, at in notes:
+            place(out, _bell(_hz(m), 1.4, decay=3.0, bright=0.5), at, 0.45)
+            place(out, _bell(_hz(m - 12), 1.0, decay=4.0, bright=0.2), at, 0.2)
+        for m in (72, 76, 79, 84):
+            place(out, _bell(_hz(m), 2.2, decay=1.6, bright=0.4), 0.95, 0.22)
+        place(out, sfx("twinkle", seed) * 0.5, 1.15)
+        return _norm(out, 0.85)
     raise ValueError(f"unknown sfx '{name}'")
 
 
 SFX_NAMES = ["chime", "twinkle", "pop", "boing", "whoosh", "splash", "knock", "steps",
-             "honk", "slide_up", "slide_down", "ding", "tada", "drumroll", "bonk", "zip"]
+             "honk", "slide_up", "slide_down", "ding", "tada", "drumroll", "bonk", "zip", "jingle"]
 AMBIENCE_NAMES = ["none", "wind", "birds", "night", "rain", "stream", "waves", "fire", "indoor", "city"]

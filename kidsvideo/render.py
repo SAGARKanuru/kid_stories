@@ -10,7 +10,7 @@ from pathlib import Path
 
 import numpy as np
 import yaml
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
 from . import ROOT, rig, sound, svgtools
 
@@ -32,6 +32,15 @@ def font(size, weight="Bold"):
     except Exception:
         pass
     return f
+
+
+def vivid(img: Image.Image, sat: float = 1.22, con: float = 1.06) -> Image.Image:
+    """Bright, saturated cartoon colours (applied once to static artwork)."""
+    a = img.getchannel("A")
+    rgb = ImageEnhance.Contrast(ImageEnhance.Color(img.convert("RGB")).enhance(sat)).enhance(con)
+    rgb = rgb.convert("RGBA")
+    rgb.putalpha(a)
+    return rgb
 
 
 def ease(p):  # smoothstep
@@ -180,7 +189,7 @@ class Particles:
         self.kind, self.W, self.H = kind, W, H
         rnd = random.Random(seed)
         count = {"fireflies": 28, "sparkles": 26, "leaves": 16, "snow": 90, "rain": 160, "bubbles": 22,
-                 "dust": 45, "petals": 20}.get(kind, 0)
+                 "dust": 45, "petals": 20, "confetti": 110}.get(kind, 0)
         self.p = [(rnd.random(), rnd.random(), rnd.random(), rnd.uniform(0.6, 1.4)) for _ in range(count)]
         self.k = W / 1920
         self.glows = []
@@ -241,6 +250,16 @@ class Particles:
                 r = 16 * s * self.k
                 d.ellipse((x - r, y - r, x + r, y + r), outline=(255, 255, 255, 170), width=3)
                 d.ellipse((x - r * 0.5, y - r * 0.6, x - r * 0.15, y - r * 0.25), fill=(255, 255, 255, 170))
+            elif k == "confetti":
+                y = ((b + t * 0.16 * s) % 1.15 - 0.08) * H
+                x = (a * W + 60 * self.k * math.sin(t * 1.6 * s + c * 9)) % W
+                ang = t * 4 * s + c * 12
+                L, Wd = 16 * s * self.k, 8 * s * self.k * abs(math.cos(t * 5 * s + a * 7))
+                cols = [(255, 92, 120), (255, 200, 60), (80, 190, 255), (120, 220, 110), (190, 120, 255), (255, 150, 60)]
+                col = cols[int(c * 6) % 6] + (240,)
+                dx, dy = math.cos(ang), math.sin(ang)
+                d.polygon([(x - dx * L - dy * Wd, y - dy * L + dx * Wd), (x + dx * L - dy * Wd, y + dy * L + dx * Wd),
+                           (x + dx * L + dy * Wd, y + dy * L - dx * Wd), (x - dx * L + dy * Wd, y - dy * L - dx * Wd)], fill=col)
             elif k == "dust":
                 x = (a * W + t * 8 * s + 20 * math.sin(t * 0.3 + c * 9)) % W
                 y = (b * H * 0.8 + 15 * math.sin(t * 0.4 * s + a * 8))
@@ -277,9 +296,10 @@ def grade_overlay(W, H, tod):
 class SceneRenderer:
     def __init__(self, scene: dict, characters: dict, W: int, H: int, fps: int, dur: float,
                  mouths: dict, talk: dict, seed: int, overlay: Image.Image | None = None, overlay_pop=False,
-                 camera_override: str | None = None, captions=None, popups=None):
+                 camera_override: str | None = None, captions=None, popups=None, shakes=None):
         self.W, self.H, self.fps, self.dur = W, H, fps, dur
         self.captions = captions or []
+        self.shakes = shakes or []
         self.popups = [(p["_t0"], p["_t1"], learn_card(p, W), p.get("position", "top")) for p in (popups or [])]
         self._cap_cache = {}
         self.scene = scene
@@ -293,6 +313,7 @@ class SceneRenderer:
             os_ = OVERSCAN[name]
             lw, lh = int(W * os_), int(H * os_)
             img = svgtools.render(svg, lw, lh, 1920, 1080)
+            img = vivid(img)
             if BLUR[name]:
                 img = img.filter(ImageFilter.GaussianBlur(BLUR[name] * W / 1920))
             if name == "sky":
@@ -347,6 +368,11 @@ class SceneRenderer:
             v = 0.3 * math.sin(2 * math.pi * t / 11.0)
         # gentle handheld breathing on every shot
         v += 0.12 * math.sin(2 * math.pi * t / 6.7)
+        for st in self.shakes:  # comedy camera shake on bonks/boings
+            if 0 <= t - st < 0.5:
+                dec = (1 - (t - st) / 0.5) ** 2
+                u += 0.16 * dec * math.sin(2 * math.pi * 17 * (t - st))
+                v += 0.22 * dec * math.cos(2 * math.pi * 13 * (t - st))
 
         ox, oy = self._offset("sky", u, v)
         fr = self.layers["sky"].crop((ox, oy, ox + self.W, oy + self.H))
@@ -371,7 +397,13 @@ class SceneRenderer:
             cid = pl["id"]
             mouth = bool(self.mouths.get(cid) is not None and i < len(self.mouths[cid]) and self.mouths[cid][i])
             talking = float(self.talk[cid][i]) if cid in self.talk and i < len(self.talk[cid]) else 0.0
-            spr.draw(fr, t, x * self.sx, y * self.sy, action, talking, mouth, offset=(-mo[0], -mo[1]))
+            appear = 1.0
+            if pl.get("enter") == "pop":
+                appear = (t - float(pl.get("start", 0.4))) / 0.45
+                if appear <= 0:
+                    continue
+            spr.draw(fr, t, x * self.sx, y * self.sy, action, talking, mouth, offset=(-mo[0], -mo[1]),
+                     appear=min(1.0, appear))
         if "fore" in self.layers:
             fo = self._offset("fore", u * 1.6, v)
             fo = (max(0, min(fo[0], self.layers["fore"].width - self.W)), max(0, min(fo[1], self.layers["fore"].height - self.H)))
@@ -414,6 +446,18 @@ class SceneRenderer:
                 else:
                     cx = (self.W - c.width) // 2
                 fr.alpha_composite(c, (max(0, cx), max(0, cy)))
+                if t - p0 < 0.9:  # sparkle burst
+                    q = (t - p0) / 0.9
+                    dd = ImageDraw.Draw(fr, "RGBA")
+                    ccx, ccy = cx + c.width / 2, cy + c.height / 2
+                    for j in range(12):
+                        ang = j * math.pi / 6 + 0.3
+                        rad = (card.width * 0.45 + 160 * self.W / 1920 * q)
+                        px_, py_ = ccx + math.cos(ang) * rad, ccy + math.sin(ang) * rad * 0.8
+                        rr = 16 * self.W / 1920 * (1 - q)
+                        colr = [(255, 220, 80), (255, 120, 160), (120, 210, 255)][j % 3] + (int(255 * (1 - q)),)
+                        dd.polygon([(px_, py_ - rr), (px_ + rr * .3, py_ - rr * .3), (px_ + rr, py_), (px_ + rr * .3, py_ + rr * .3),
+                                    (px_, py_ + rr), (px_ - rr * .3, py_ + rr * .3), (px_ - rr, py_), (px_ - rr * .3, py_ - rr * .3)], fill=colr)
         for k, (c0, c1, text, talk) in enumerate(self.captions):
             if c0 <= t < c1:
                 if k not in self._cap_cache:
@@ -424,13 +468,113 @@ class SceneRenderer:
         return fr
 
 
+class IntroRenderer:
+    """Branded animated opener: rotating sunburst, bouncing rainbow title, story ribbon, cast pops in, confetti."""
+    RAINBOW = [(255, 92, 120), (255, 160, 50), (255, 210, 60), (110, 205, 100), (70, 180, 255), (170, 120, 255)]
+
+    def __init__(self, spec, characters, W, H, fps, dur, mouths=None, talk=None):
+        self.W, self.H, self.fps, self.dur = W, H, fps, dur
+        s = W / 1920
+        D = int(math.hypot(W, H)) + 40
+        rays = Image.new("RGBA", (D, D), (255, 196, 70, 255))
+        d = ImageDraw.Draw(rays)
+        c = D / 2
+        for k in range(24):
+            if k % 2:
+                continue
+            a0, a1 = k * math.pi / 12, (k + 1) * math.pi / 12
+            d.polygon([(c, c), (c + D * math.cos(a0), c + D * math.sin(a0)), (c + D * math.cos(a1), c + D * math.sin(a1))],
+                      fill=(255, 222, 110, 255))
+        yy, xx = np.mgrid[0:D, 0:D].astype(np.float32)
+        r = np.sqrt((xx - c) ** 2 + (yy - c) ** 2) / (D / 2)
+        glow = np.zeros((D, D, 4), np.uint8)
+        glow[..., 0:3] = (255, 250, 225)
+        glow[..., 3] = (np.clip(1 - r * 1.6, 0, 1) ** 1.5 * 230).astype(np.uint8)
+        rays.alpha_composite(Image.fromarray(glow, "RGBA"))
+        edge = np.zeros((D, D, 4), np.uint8)
+        edge[..., 0:3] = (235, 95, 60)
+        edge[..., 3] = (np.clip((r - 0.45) / 0.55, 0, 1) ** 1.3 * 200).astype(np.uint8)
+        rays.alpha_composite(Image.fromarray(edge, "RGBA"))
+        self.rays = rays
+        hill = svgtools.render(
+            '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8EDB6E"/>'
+            '<stop offset="1" stop-color="#4FA348"/></linearGradient></defs>'
+            '<path d="M0 900 C400 840 700 870 960 865 C1250 860 1500 835 1920 880 V1080 H0Z" fill="url(#g)"/>'
+            '<path d="M0 900 C400 840 700 870 960 865 C1250 860 1500 835 1920 880 L1920 896 C1500 851 1250 876 960 881 '
+            'C700 886 400 856 0 916Z" fill="#C6F2A2" opacity=".7"/>', W, H)
+        self.hill = vivid(hill)
+        # rainbow letters of the channel name
+        f = font(int(112 * s), "Bold")
+        self.letters = []
+        name = spec.get("channel", "")
+        x = (W - f.getlength(name)) / 2
+        for i, ch in enumerate(name):
+            w = f.getlength(ch)
+            if ch.strip():
+                img = text_block(ch, 400 * s, int(112 * s), fill=self.RAINBOW[i % 6], stroke=(60, 30, 90))
+                self.letters.append((img, x + w / 2, i))
+            x += w
+        # story title ribbon
+        title = text_block(spec["title"], 1500 * s, int(78 * s), fill=(255, 255, 255), stroke=(80, 30, 110))
+        rw, rh = title.width + int(110 * s), title.height + int(40 * s)
+        rib = Image.new("RGBA", (rw + 20, rh + 30), (0, 0, 0, 0))
+        dr = ImageDraw.Draw(rib)
+        dr.rounded_rectangle((10, 18, rw + 10, rh + 18), radius=int(rh / 2), fill=(60, 20, 80, 90))
+        dr.rounded_rectangle((10, 8, rw + 10, rh + 8), radius=int(rh / 2), fill=(138, 72, 200),
+                             outline=(255, 214, 90), width=max(4, int(8 * s)))
+        rib.alpha_composite(title, ((rib.width - title.width) // 2, 8 + (rh - title.height) // 2))
+        self.ribbon = rib
+        # cast
+        cast = [c for c in spec.get("cast", []) if c in characters][:3]
+        xs = {1: [960], 2: [760, 1160], 3: [600, 960, 1320]}.get(len(cast), [])
+        self.cast = []
+        for i, (cid, xx) in enumerate(zip(cast, xs)):
+            h = int(400 * H / 1080)
+            spr = rig.Sprite(characters[cid], h, "right" if xx < 960 else "left", "day", seed=i * 7)
+            self.cast.append((spr, xx * W / 1920, 2.0 + i * 0.22))
+        self.confetti = Particles("confetti", W, H, 5)
+
+    def frame(self, i):
+        t = i / self.fps
+        W, H = self.W, self.H
+        ang = t * 9
+        rot = self.rays.rotate(ang, resample=Image.BILINEAR)
+        cx, cy = rot.width / 2, rot.height / 2 + H * 0.08
+        fr = rot.crop((int(cx - W / 2), int(cy - H / 2), int(cx - W / 2) + W, int(cy - H / 2) + H))
+        fr.alpha_composite(self.hill)
+        for spr, x, t0 in self.cast:
+            if t >= t0:
+                spr.draw(fr, t, x, H * 0.955, "bounce", 0, False, appear=min(1.0, (t - t0) / 0.45))
+        base_y = H * 0.07
+        for img, x, k in self.letters:
+            t0 = 0.25 + k * 0.05
+            if t < t0:
+                continue
+            q = min(1.0, (t - t0) / 0.5)
+            drop = (1 - (1 + 2.6 * (q - 1) ** 3 + 1.6 * (q - 1) ** 2)) * H * 0.25
+            wob = math.sin(2 * math.pi * (t * 0.9 + k * 0.08)) * 8 * H / 1080 if q >= 1 else 0
+            fr.alpha_composite(img, (int(x - img.width / 2), max(0, int(base_y - drop + wob))))
+        if t >= 1.4:
+            q = min(1.0, (t - 1.4) / 0.5)
+            k = max(0.02, 1 + 2.7 * (q - 1) ** 3 + 1.7 * (q - 1) ** 2)
+            rb = self.ribbon if abs(k - 1) < 0.01 else self.ribbon.resize(
+                (max(1, int(self.ribbon.width * k)), max(1, int(self.ribbon.height * k))), Image.BILINEAR)
+            fr.alpha_composite(rb, ((W - rb.width) // 2, int(H * 0.36 - rb.height / 2)))
+        self.confetti.draw(fr, t)
+        return fr
+
+
 def _render_segment(job):
     """Worker: render one segment to an mp4 (video only)."""
-    (scene, characters, W, H, fps, dur, mouths, talk, seed, out, overlay_spec, cam, caps, pops) = job
+    (scene, characters, W, H, fps, dur, mouths, talk, seed, out, overlay_spec, cam, caps, pops, shakes) = job
     overlay, pop = None, False
-    if overlay_spec:
-        overlay, pop = _build_overlay(overlay_spec, W, H), overlay_spec.get("pop", False)
-    r = SceneRenderer(scene, characters, W, H, fps, dur, mouths, talk, seed, overlay, pop, cam, caps, pops)
+    if overlay_spec and overlay_spec.get("intro"):
+        r = IntroRenderer(overlay_spec, characters, W, H, fps, dur)
+    else:
+        if overlay_spec:
+            overlay, pop = _build_overlay(overlay_spec, W, H), overlay_spec.get("pop", False)
+        r = None
+    r = r or SceneRenderer(scene, characters, W, H, fps, dur, mouths, talk, seed, overlay, pop, cam, caps, pops, shakes)
     n = int(round(dur * fps))
     proc = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
                              "-s", f"{W}x{H}", "-r", str(fps), "-i", "-", "-c:v", "libx264", "-preset", "veryfast",
@@ -474,30 +618,34 @@ def build_timeline(story, cfg, characters, cache):
     def voice_for(speaker):
         if speaker and speaker in characters and characters[speaker].get("voice"):
             v = characters[speaker]["voice"]
-            return v["name"], v.get("rate", vcfg["rate"]), v.get("pitch", "+0Hz")
-        return vcfg["narrator"], vcfg["rate"], vcfg["pitch"]
+            return v["name"], v.get("rate", vcfg["rate"]), v.get("pitch", "+0Hz"), float(v.get("shift", 0))
+        return vcfg["narrator"], vcfg["rate"], vcfg["pitch"], float(vcfg.get("shift", 0))
 
     segs = []
     title_idx = story.get("title_scene", 0)
     intro_line = {"text": story.get("intro") or f"Hi friends! Welcome to {cfg['channel_name']}! Today's story is... {story['title']}!",
                   "speaker": None}
-    segs.append({"kind": "intro", "scene": story["scenes"][title_idx], "lines": [intro_line], "lead": 1.4, "tail": 1.6,
-                 "min": 5.5, "sfx": [{"at": 0.25, "name": "twinkle"}]})
+    segs.append({"kind": "intro", "scene": story["scenes"][title_idx], "lines": [intro_line], "lead": 2.2, "tail": 1.4,
+                 "min": 6.5, "sfx": [{"at": 0.15, "name": "jingle"}, {"at": 1.4, "name": "pop"}]})
     for sc in story["scenes"]:
         segs.append({"kind": "scene", "scene": sc, "lines": sc["narration"], "lead": 0.8, "tail": 1.1, "min": 4.0,
                      "sfx": sc.get("sfx", [])})
     outro_text = story.get("outro") or (f"The End! Remember, friends: {story['moral']} "
                                          "Did you like this story? See you tomorrow for a brand-new one. Bye-bye!")
-    segs.append({"kind": "outro", "scene": story["scenes"][story.get("outro_scene", -1)],
+    end_sc = dict(story["scenes"][story.get("outro_scene", -1)])
+    end_sc["particles"] = "confetti"
+    end_sc["characters"] = [dict(c, action="dance") for c in end_sc.get("characters", [])
+                            if c.get("action") != "walk"] or end_sc.get("characters", [])
+    segs.append({"kind": "outro", "scene": end_sc,
                  "lines": [{"text": outro_text, "speaker": None}], "lead": 1.0, "tail": 2.5, "min": 8.0,
-                 "sfx": [{"at": 0.3, "name": "chime"}]})
+                 "sfx": [{"at": 0.3, "name": "tada"}]})
 
     t = 0.0
     for seg in segs:
         cur = seg["lead"]
         prev = "__start__"
         for ln in seg["lines"]:
-            name, rate, pitch = voice_for(ln.get("speaker"))
+            name, rate, pitch, shift = voice_for(ln.get("speaker"))
             try:
                 a = sound.tts(ln["text"], name, rate, pitch, cache)
             except RuntimeError as e:  # unknown/unavailable character voice -> narrator voice
@@ -505,6 +653,7 @@ def build_timeline(story, cfg, characters, cache):
                     raise
                 print(f"warning: {e}; using narrator voice for this line")
                 a = sound.tts(ln["text"], vcfg["narrator"], vcfg["rate"], pitch, cache)
+            a = sound.voice_fx(a, shift)
             if prev != "__start__":
                 cur += 0.55 if ln.get("speaker") != prev else 0.3
             ln["_start"], ln["_audio"] = cur, a
@@ -557,6 +706,16 @@ def build_timeline(story, cfg, characters, cache):
     return segs, total
 
 
+SHAKE_SFX = {"bonk", "boing", "honk", "splash", "drumroll"}
+
+
+def resolve_at(seg, at):
+    if isinstance(at, str) and at.startswith("line:"):
+        lines = seg["lines"]
+        return lines[min(int(at.split(":")[1]), len(lines) - 1)]["_start"] - 0.15 if lines else 0.0
+    return float(at or 0)
+
+
 def mix_audio(segs, total, cfg, seed, mood):
     vc = cfg["video"]
     n = int((total + 0.5) * sound.SR)
@@ -578,11 +737,7 @@ def mix_audio(segs, total, cfg, seed, mood):
                 except ValueError as e:
                     print("warning:", e)
         for ev in seg.get("sfx", []):
-            at = ev.get("at", 0)
-            if isinstance(at, str) and at.startswith("line:"):
-                li = int(at.split(":")[1])
-                lines = seg["lines"]
-                at = lines[min(li, len(lines) - 1)]["_start"] - 0.15 if lines else 0
+            at = resolve_at(seg, ev.get("at", 0))
             try:
                 sound.place(fx, sound.sfx(ev["name"], seed + k), seg["start"] + float(at))
             except ValueError as e:
@@ -687,7 +842,12 @@ def render_episode(ep_dir: Path, workers: int | None = None, preview_only=False)
         ov = None
         cam = None
         if seg["kind"] == "intro":
-            ov = {"kicker": cfg["channel_name"] + " presents", "title": story["title"], "pop": True}
+            cast = []
+            for sc in story["scenes"]:
+                for pl in sc.get("characters", []):
+                    if pl["id"] not in cast:
+                        cast.append(pl["id"])
+            ov = {"intro": True, "channel": cfg["channel_name"], "title": story["title"], "cast": cast}
             cam = "push_in"
         elif seg["kind"] == "outro":
             ov = {"title": "The End", "sub": story["moral"]}
@@ -696,7 +856,8 @@ def render_episode(ep_dir: Path, workers: int | None = None, preview_only=False)
             cam = cams[k % len(cams)]
         caps = segment_captions(seg) if vc.get("captions", True) else []
         jobs.append((seg["scene"], characters, W, H, fps, dur, seg["mouths"], seg["talk"], seed + k,
-                     work / f"seg_{k:02d}.mp4", ov, cam, caps, seg.get("popups", [])))
+                     work / f"seg_{k:02d}.mp4", ov, cam, caps, seg.get("popups", []),
+                     [resolve_at(seg, e.get("at", 0)) + 0.1 for e in seg.get("sfx", []) if e.get("name") in SHAKE_SFX]))
     workers = workers or max(1, min(len(jobs), os.cpu_count() or 2))
     with ProcessPoolExecutor(max_workers=workers) as ex:
         outs = list(ex.map(_render_segment, jobs))

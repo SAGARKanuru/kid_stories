@@ -46,7 +46,7 @@ Sign in with the account that owns the channel. Add the three printed values in 
 - In YouTube Studio → Settings → Channel → Advanced, set the audience to *Yes, it's made for kids*.
 
 ### 5. Pick the voices (optional)
-GitHub → **Actions → Voice samples → Run workflow**, then download the MP3s from the run page. The narrator is a cheerful child voice by default; Pip and Tumble are kid voices and Nana Hoot is a grandma voice. Change them in `config.yaml` (narrator) and `characters/*.json` (`voice`).
+GitHub → **Actions → Voice samples → Run workflow**, then download the MP3s from the run page. The narrator is a cheerful child voice by default; Pip and Tumble are kid voices and Nana Hoot is a grandma voice. Change them in `config.yaml` (narrator) and `characters/*.json` (`voice`). `shift` (in semitones) gives a voice a cartoon-child sound: higher = smaller and younger, lower = chubbier and sillier; `0` = natural.
 
 ### 6. Test it
 GitHub → **Actions → Render & upload episode → Run workflow** with episode `samples/pip-and-the-runaway-kite` and *Upload* unchecked. Download the video from the run page (Artifacts).
