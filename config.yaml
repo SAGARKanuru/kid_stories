@@ -73,7 +73,7 @@ video:
   sfx_volume: 0.45
 
 youtube:
-  privacy: "private"             # private | unlisted | public (public needs Google API audit, see README)
+  privacy: "public"              # YouTube keeps API uploads private until Google approves the API audit (see README)
   category_id: "1"               # 1 = Film & Animation, 27 = Education
   made_for_kids: true            # required for children's content (COPPA)
   contains_synthetic_media: true # discloses AI-generated story, art and voices

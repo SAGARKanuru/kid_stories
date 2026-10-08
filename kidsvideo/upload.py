@@ -94,7 +94,11 @@ def upload(ep_dir: Path, story: dict, cfg: dict) -> dict:
                 continue
             raise
     vid = resp["id"]
-    print(f"Uploaded: https://youtu.be/{vid}  (privacy: {resp['status']['privacyStatus']})")
+    got = resp["status"]["privacyStatus"]
+    print(f"Uploaded: https://youtu.be/{vid}  (privacy: {got})")
+    if got != body["status"]["privacyStatus"]:
+        print(f"::warning::Asked for '{body['status']['privacyStatus']}' but YouTube set '{got}'. Until Google approves "
+              "the YouTube API audit for this project, every API upload is locked to private. See README.")
 
     thumb = ep_dir / "thumbnail.jpg"
     if thumb.exists():
