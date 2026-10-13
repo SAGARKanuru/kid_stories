@@ -77,7 +77,7 @@ def tts(text: str, voice: str, rate: str = "+0%", pitch: str = "+0Hz", cache: Pa
         return _espeak(text, pitch, cache / f"tts_{key}.wav")
     if not mp3.exists():
         err = None
-        for attempt in range(4):
+        for attempt in range(3):
             try:
                 asyncio.run(_edge(text, voice, rate, pitch, str(mp3)))
                 if mp3.exists() and mp3.stat().st_size > 1000:
@@ -97,6 +97,76 @@ def tts(text: str, voice: str, rate: str = "+0%", pitch: str = "+0Hz", cache: Pa
     if len(idx):
         a = a[max(0, idx[0] - 1200): idx[-1] + 2400]
     return a
+
+
+# ---------------------------------------------------------------- backup voice engine (runs offline)
+# Microsoft's free voice service (edge-tts) sometimes blocks connections for days. When it does, we switch the
+# WHOLE episode to Kokoro, a small open-source neural voice model that runs on the GitHub machine itself.
+_STATE = {"engine": None, "kokoro": {}}
+KOKORO_SR = 24000
+
+
+def _kokoro(text: str, voice: str, speed: float) -> np.ndarray:
+    from kokoro import KPipeline  # heavy import, only when needed
+    lang = "b" if voice.startswith("b") else "a"
+    pipes = _STATE["kokoro"]
+    if lang not in pipes:
+        pipes[lang] = KPipeline(lang_code=lang, repo_id="hexgrad/Kokoro-82M")
+    chunks = []
+    for _, _, audio in pipes[lang](text, voice=voice, speed=float(speed)):
+        if audio is not None:
+            chunks.append(np.asarray(audio.cpu().numpy() if hasattr(audio, "cpu") else audio, dtype=np.float32))
+    if not chunks:
+        raise RuntimeError("kokoro produced no audio")
+    a = np.concatenate(chunks)
+    # 24 kHz -> 48 kHz
+    a = np.interp(np.arange(len(a) * 2) / 2.0, np.arange(len(a)), a).astype(np.float32)
+    idx = np.where(np.abs(a) > 0.01)[0]
+    if len(idx):
+        a = a[max(0, idx[0] - 1200): idx[-1] + 2400]
+    return a
+
+
+def edge_available() -> bool:
+    """One quick probe of the Microsoft voice service, cached for the run."""
+    if _STATE["engine"] is None:
+        try:
+            import tempfile as _tf
+            with _tf.TemporaryDirectory() as d:
+                asyncio.run(_edge("Hello friends!", "en-US-AnaNeural", "+0%", "+0Hz", f"{d}/probe.mp3"))
+                ok = Path(f"{d}/probe.mp3").stat().st_size > 1000
+        except Exception as e:
+            print(f"  voice service check failed: {type(e).__name__}: {str(e)[:160]}")
+            ok = False
+        _STATE["engine"] = "edge" if ok else "kokoro"
+        print(f"  voice engine: {'Microsoft neural voices (edge-tts)' if ok else 'Kokoro backup voices (offline)'}")
+    return _STATE["engine"] == "edge"
+
+
+def speak(text: str, v: dict, cache: Path, mode: str = "auto") -> np.ndarray:
+    """Speak `text` with voice spec v = {name, rate, pitch, shift, backup:{voice, speed, shift}}.
+    mode: auto (edge, else Kokoro for the whole run) | edge | kokoro."""
+    backup = v.get("backup") or {"voice": "af_heart", "speed": 0.95, "shift": 2.5}
+    if os.environ.get("TTS_OFFLINE") == "1":
+        return voice_fx(tts(text, v["name"], v.get("rate", "+0%"), v.get("pitch", "+0Hz"), cache), float(v.get("shift", 0)))
+    use_edge = mode == "edge" or (mode == "auto" and edge_available())
+    if use_edge:
+        try:
+            return voice_fx(tts(text, v["name"], v.get("rate", "+0%"), v.get("pitch", "+0Hz"), cache),
+                            float(v.get("shift", 0)))
+        except Exception as e:
+            if mode == "edge":
+                raise
+            print(f"  warning: edge-tts failed mid-episode ({str(e)[:120]}); using Kokoro for this line")
+    key = hashlib.sha1(f"kokoro|{backup}|{text}".encode()).hexdigest()[:16]
+    wav = Path(cache) / f"kok_{key}.wav"
+    if wav.exists() and wav.stat().st_size > 1000:
+        a = decode(wav)
+    else:
+        Path(cache).mkdir(parents=True, exist_ok=True)
+        a = _kokoro(text, backup.get("voice", "af_heart"), backup.get("speed", 0.95))
+        write_wav(wav, a)
+    return voice_fx(a, float(backup.get("shift", 0)))
 
 
 def _espeak(text, pitch, wav):

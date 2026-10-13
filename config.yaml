@@ -62,6 +62,11 @@ voice:
   rate: "-6%"        # a little slower so 3-5 year olds can follow
   pitch: "+0Hz"
   shift: 1.0         # semitones of "cartoon child" pitch+timbre shift (0 = natural voice; try 0 to 2)
+  engine: "auto"     # auto = Microsoft voices, or the offline Kokoro backup if Microsoft's service is down
+  backup:            # Kokoro voice used when Microsoft's service is down
+    voice: "af_heart"
+    speed: 0.92
+    shift: 3.0
 
 video:
   width: 1920

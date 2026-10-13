@@ -8,7 +8,12 @@
   "name": "en-GB-SoniaNeural",
   "rate": "-10%",
   "pitch": "+0Hz",
-  "shift": 1.5
+  "shift": 1.5,
+  "backup": {
+   "voice": "bf_emma",
+   "speed": 0.88,
+   "shift": 1.0
+  }
  },
  "viewbox": [
   400,

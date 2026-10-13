@@ -2,6 +2,9 @@ name: Voice samples
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["kidsvideo/sound.py", "tools/tts_check.py", ".github/workflows/voice-samples.yml"]
 
 jobs:
   samples:
@@ -13,11 +16,18 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg libcairo2
-      - run: pip install -r requirements.txt
-      - run: python tools/voice_samples.py
+      - run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg libcairo2 espeak-ng
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: kokoro-82m-v1
+      - run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+      - name: Check both voice engines
+        run: python tools/tts_check.py
       - uses: actions/upload-artifact@v4
         with:
           name: voice-samples
-          path: voice-samples/*.mp3
+          path: voice-samples/*.wav
           retention-days: 7

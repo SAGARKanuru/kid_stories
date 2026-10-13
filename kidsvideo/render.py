@@ -615,11 +615,13 @@ def build_timeline(story, cfg, characters, cache):
     vcfg = cfg["voice"]
     fps = cfg["video"]["fps"]
 
+    narrator = {"name": vcfg["narrator"], "rate": vcfg["rate"], "pitch": vcfg["pitch"],
+                "shift": vcfg.get("shift", 0), "backup": vcfg.get("backup")}
+
     def voice_for(speaker):
         if speaker and speaker in characters and characters[speaker].get("voice"):
-            v = characters[speaker]["voice"]
-            return v["name"], v.get("rate", vcfg["rate"]), v.get("pitch", "+0Hz"), float(v.get("shift", 0))
-        return vcfg["narrator"], vcfg["rate"], vcfg["pitch"], float(vcfg.get("shift", 0))
+            return characters[speaker]["voice"]
+        return narrator
 
     segs = []
     title_idx = story.get("title_scene", 0)
@@ -645,15 +647,14 @@ def build_timeline(story, cfg, characters, cache):
         cur = seg["lead"]
         prev = "__start__"
         for ln in seg["lines"]:
-            name, rate, pitch, shift = voice_for(ln.get("speaker"))
+            v = voice_for(ln.get("speaker"))
             try:
-                a = sound.tts(ln["text"], name, rate, pitch, cache)
-            except RuntimeError as e:  # unknown/unavailable character voice -> narrator voice
-                if name == vcfg["narrator"]:
+                a = sound.speak(ln["text"], v, cache, vcfg.get("engine", "auto"))
+            except Exception as e:  # unavailable character voice -> narrator voice
+                if v is narrator:
                     raise
                 print(f"warning: {e}; using narrator voice for this line")
-                a = sound.tts(ln["text"], vcfg["narrator"], vcfg["rate"], pitch, cache)
-            a = sound.voice_fx(a, shift)
+                a = sound.speak(ln["text"], narrator, cache, vcfg.get("engine", "auto"))
             if prev != "__start__":
                 cur += 0.55 if ln.get("speaker") != prev else 0.3
             ln["_start"], ln["_audio"] = cur, a

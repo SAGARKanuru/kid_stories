@@ -3,7 +3,7 @@ name: Render & upload episode
 on:
   push:
     branches: [main]
-    paths: ["episodes/**/story.json"]
+    paths: ["episodes/**/story.json", "kidsvideo/**", "config.yaml", "requirements.txt"]
   workflow_dispatch:
     inputs:
       episode:
@@ -33,11 +33,19 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install ffmpeg and Cairo
-        run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg libcairo2
+      - name: Install ffmpeg, Cairo and espeak-ng
+        run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg libcairo2 espeak-ng
+
+      - name: Cache backup voice model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: kokoro-82m-v1
 
       - name: Install Python packages
-        run: pip install -r requirements.txt
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
 
       - name: Render (and upload)
         env:

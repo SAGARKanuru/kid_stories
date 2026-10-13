@@ -52,13 +52,22 @@ def main():
             failed = True
             continue
         print(f"▶ Rendering {ep.name}: {story['title']}")
-        meta = render_episode(ep)
-        print(f"  video ready: {meta['duration']:.0f}s")
-        info = None
-        if not args.no_upload:
-            from .upload import upload
-            info = upload(ep, story, cfg)
-            record_history(ep, story, info)
+        stage = "render"
+        try:
+            meta = render_episode(ep)
+            print(f"  video ready: {meta['duration']:.0f}s")
+            info = None
+            if not args.no_upload:
+                stage = "upload"
+                from .upload import upload
+                info = upload(ep, story, cfg)
+                record_history(ep, story, info)
+        except BaseException as e:  # show the reason on the GitHub run page, then fail the run
+            import traceback
+            tb = traceback.format_exc().strip().splitlines()
+            where = next((l.strip() for l in reversed(tb) if l.strip().startswith("File")), "")
+            print(f"::error title={ep.name} {stage} failed::{type(e).__name__}: {str(e)[:500]} | {where}")
+            raise
         summary.append(f"| {ep.name} | {story['title']} | {meta['duration']:.0f}s | {(info or {}).get('url', 'not uploaded')} |")
     if os.environ.get("GITHUB_STEP_SUMMARY") and summary:
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
