@@ -54,6 +54,50 @@ def build_description(story: dict, cfg: dict) -> str:
     )[:4900]
 
 
+class UploadLimit(Exception):
+    """YouTube refused more uploads today (daily quota / upload limit). Try again tomorrow."""
+
+
+_RECENT = {}
+
+
+def recent_uploads(yt, pages: int = 6) -> list[dict]:
+    """Titles and ids of the channel's most recent uploads (newest first), cached per run."""
+    if "items" in _RECENT:
+        return _RECENT["items"]
+    ch = yt.channels().list(part="contentDetails", mine=True).execute()
+    pl = ch["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
+    items, token = [], None
+    for _ in range(pages):
+        r = yt.playlistItems().list(part="snippet", playlistId=pl, maxResults=50, pageToken=token).execute()
+        for it in r.get("items", []):
+            sn = it["snippet"]
+            items.append({"id": sn["resourceId"]["videoId"], "title": sn["title"], "at": sn.get("publishedAt", "")})
+        token = r.get("nextPageToken")
+        if not token:
+            break
+    _RECENT["items"] = items
+    return items
+
+
+def already_uploaded(story: dict) -> dict | None:
+    """If a video with this exact title is already on the channel, return its record instead of uploading again."""
+    yt = _client()
+    title = story["title"][:100]
+    matches = [v for v in recent_uploads(yt) if v["title"] == title]
+    if not matches:
+        return None
+    keep = sorted(matches, key=lambda v: v["at"])[0]  # the first copy
+    extra = [v["id"] for v in matches if v["id"] != keep["id"]]
+    if extra:
+        print(f"::warning title=Duplicate uploads::'{title}' is on the channel {len(matches)} times. Keeping "
+              f"https://youtu.be/{keep['id']}; delete these copies in YouTube Studio: "
+              + ", ".join(f"https://youtu.be/{x}" for x in extra))
+    return {"video_id": keep["id"], "url": f"https://youtu.be/{keep['id']}", "privacy": "unknown",
+            "uploaded_at": keep["at"], "note": "found already on the channel; not uploaded again",
+            "duplicates": [f"https://youtu.be/{x}" for x in extra]}
+
+
 def upload(ep_dir: Path, story: dict, cfg: dict) -> dict:
     yt_cfg = cfg["youtube"]
     yt = _client()
@@ -92,6 +136,9 @@ def upload(ep_dir: Path, story: dict, cfg: dict) -> dict:
                 retries += 1
                 time.sleep(2 ** retries)
                 continue
+            if e.resp.status in (400, 403) and any(r in str(e) for r in ("uploadLimitExceeded", "quotaExceeded",
+                                                                          "dailyLimitExceeded")):
+                raise UploadLimit(str(e)[:300]) from None
             raise
     vid = resp["id"]
     got = resp["status"]["privacyStatus"]
@@ -117,4 +164,5 @@ def upload(ep_dir: Path, story: dict, cfg: dict) -> dict:
     info = {"video_id": vid, "url": f"https://youtu.be/{vid}", "privacy": resp["status"]["privacyStatus"],
             "uploaded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
     (ep_dir / "upload.json").write_text(json.dumps(info, indent=2))
+    _RECENT.setdefault("items", []).insert(0, {"id": vid, "title": story["title"][:100], "at": info["uploaded_at"]})
     return info

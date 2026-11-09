@@ -7,6 +7,7 @@
 import argparse
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -29,20 +30,59 @@ def record_history(ep: Path, story: dict, info: dict | None):
     path.write_text(json.dumps(hist, indent=1))
 
 
+def commit_record(ep: Path):
+    """Save the upload record to the repo right away, so a later timeout can never cause a re-upload."""
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return
+    run = lambda *a: subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True)
+    run("config", "user.name", "kids-story-bot")
+    run("config", "user.email", "kids-story-bot@users.noreply.github.com")
+    run("add", "data/history.json", str(ep / "upload.json"))
+    if run("diff", "--cached", "--quiet").returncode == 0:
+        return
+    run("commit", "-m", f"Record uploaded episode {ep.name} [skip ci]")
+    for _ in range(4):
+        if run("push").returncode == 0:
+            return
+        run("pull", "--rebase", "-q")
+    print(f"::warning::could not push the upload record for {ep.name}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--episode", help="episode folder (default: all pending in episodes/)")
     ap.add_argument("--no-upload", action="store_true")
+    ap.add_argument("--max", type=int, default=int(os.environ.get("MAX_EPISODES", "5")),
+                    help="most new videos to render+upload in one run (YouTube allows ~6 uploads a day)")
     args = ap.parse_args()
 
     cfg = load_config()
-    eps = [Path(args.episode)] if args.episode else pending_episodes()
+    eps = [Path(args.episode)] if args.episode else pending_episodes()[::-1]  # newest first, then the backlog
     if not eps:
         print("No pending episodes.")
         return
     summary = []
     failed = False
+    rendered = 0
     for ep in eps:
+        if not args.no_upload and not args.episode:
+            from .upload import already_uploaded
+            story = json.loads((ep / "story.json").read_text())
+            try:
+                found = already_uploaded(story)
+            except Exception as e:
+                print(f"::warning::could not check the channel for '{story['title']}': {str(e)[:200]}")
+                found = None
+            if found:
+                (ep / "upload.json").write_text(json.dumps(found, indent=2))
+                record_history(ep, story, found)
+                commit_record(ep)
+                print(f"✓ {ep.name} is already on YouTube ({found['url']}); recorded, not uploaded again")
+                summary.append(f"| {ep.name} | {story['title']} | - | {found['url']} (already there) |")
+                continue
+        if rendered >= args.max:
+            print(f"… {ep.name} left for the next run (limit {args.max} per run)")
+            continue
         story = json.loads((ep / "story.json").read_text())
         errs = validate(story)
         soft = ("story is short", "missing 'learning'", "no learning popups")
@@ -62,7 +102,13 @@ def main():
                 from .upload import upload
                 info = upload(ep, story, cfg)
                 record_history(ep, story, info)
-        except BaseException as e:  # show the reason on the GitHub run page, then fail the run
+                commit_record(ep)
+            rendered += 1
+        except BaseException as e:
+            if type(e).__name__ == "UploadLimit":
+                print(f"::warning title=YouTube daily limit::YouTube won't take more uploads today ({str(e)[:200]}). "
+                      "The rest will upload on the next run.")
+                break  # show the reason on the GitHub run page, then fail the run
             import traceback
             tb = traceback.format_exc().strip().splitlines()
             where = next((l.strip() for l in reversed(tb) if l.strip().startswith("File")), "")
