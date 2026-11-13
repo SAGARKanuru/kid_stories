@@ -16,7 +16,7 @@ CAMERAS = {"pan_left", "pan_right", "push_in", "pull_out", "drift", "still"}
 TODS = set(rig.TINTS)
 PARTICLES = {"none", "fireflies", "sparkles", "leaves", "snow", "rain", "bubbles", "dust", "petals", "confetti"}
 TRANSITIONS = {"fade", "fadeblack", "smoothleft", "smoothright", "circleopen", "dissolve", "wipeleft"}
-ACTIONS = {"idle", "bounce", "hop", "walk", "sleep", "shake", "wobble", "dance"}
+ACTIONS = {"idle", "bounce", "hop", "walk", "sleep", "shake", "wobble", "dance", "spin", "laugh"}
 SHAPES = {"none", "circle", "square", "rectangle", "triangle", "star", "heart", "diamond"}
 PARTS = ["body", "head", "eyes_open", "eyes_closed", "mouth_closed", "mouth_open"]
 
@@ -34,6 +34,12 @@ def validate(story: dict) -> list[str]:
             if p not in ch.get("parts", {}):
                 errs.append(f"new character {cid} missing part {p}")
     known = {p.stem for p in (ROOT / "characters").glob("*.json")} | set(extra)
+    retired = {p.stem for p in (ROOT / "characters" / "retired").glob("*.json")}
+    used = {pl.get("id") for sc in story.get("scenes", []) for pl in sc.get("characters", [])}
+    if story.get("date", "") >= "2026-11-14":
+        for cid in sorted(used & retired - set(extra)):
+            errs.append(f"'{cid}' has retired - use the current cast in characters/*.json")
+    known |= retired
     words = 0
     for i, sc in enumerate(story.get("scenes", [])):
         tag = f"scene {i + 1}"

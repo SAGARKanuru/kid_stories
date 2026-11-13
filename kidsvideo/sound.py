@@ -451,6 +451,48 @@ def sfx(name: str, seed: int = 0) -> np.ndarray:
         f = 400 + 2600 * (t / t[-1]) ** 2
         return _norm(_fft_filter((np.sin(2 * np.pi * np.cumsum(f) / SR) * np.sin(np.pi * t / t[-1]) +
                                   0.4 * rng.standard_normal(len(t))).astype(np.float32), lo=600, hi=6000), 0.6)
+    if name == "hiccup":
+        t = np.arange(int(0.22 * SR)) / SR
+        f = 520 + 900 * np.exp(-t * 30)
+        return _norm(np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 22) * np.minimum(1, t * 600), 0.7)
+    if name == "giggle":
+        out = np.zeros(int(1.1 * SR), np.float32)
+        for i in range(6):
+            t = np.arange(int(0.1 * SR)) / SR
+            f = 760 - 40 * i + 140 * np.sin(2 * np.pi * 28 * t)
+            g = (np.sin(2 * np.pi * np.cumsum(f) / SR) + 0.4 * np.sin(4 * np.pi * np.cumsum(f) / SR)) * np.sin(np.pi * t / t[-1])
+            place(out, g.astype(np.float32) * 0.45, i * 0.14)
+        return _norm(_fft_filter(out, lo=300, hi=3500), 0.6)
+    if name == "bleat":  # goat "baa-a-a"
+        t = np.arange(int(0.9 * SR)) / SR
+        f = 330 + 30 * np.sin(2 * np.pi * 9 * t) * np.minimum(1, t * 4)
+        ph = 2 * np.pi * np.cumsum(f) / SR
+        w = sum(np.sin(k * ph) / k for k in range(1, 8)) * (0.6 + 0.4 * np.sin(2 * np.pi * 9 * t))
+        env = np.minimum(1, t / 0.05) * np.minimum(1, (t[-1] - t) / 0.25)
+        return _norm(_fft_filter((w * env).astype(np.float32), lo=250, hi=3000), 0.7)
+    if name == "snore":
+        n = int(2.4 * SR)
+        t = np.arange(n) / SR
+        w = rng.standard_normal(n).astype(np.float32)
+        env = np.clip(np.sin(np.pi * t / 1.2), 0, 1) ** 2
+        buzz = np.sin(2 * np.pi * 70 * t) * (np.sin(2 * np.pi * t / 2.4) > 0)
+        return _norm(_fft_filter(w * env, lo=80, hi=900) + 0.5 * buzz * env, 0.6)
+    if name == "tummy":  # funny tummy rumble
+        t = np.arange(int(1.2 * SR)) / SR
+        f = 70 + 40 * np.sin(2 * np.pi * 3 * t) + 25 * np.sin(2 * np.pi * 11 * t)
+        w = np.sin(2 * np.pi * np.cumsum(f) / SR) * (0.5 + 0.5 * np.sin(2 * np.pi * 6 * t))
+        env = np.sin(np.pi * t / t[-1])
+        return _norm((w * env).astype(np.float32), 0.8)
+    if name == "whistle":  # Pinky's super-loud whistle
+        t = np.arange(int(0.9 * SR)) / SR
+        f = 2200 + 700 * np.minimum(1, t / 0.15) - 500 * np.maximum(0, t - 0.6) / 0.3
+        env = np.minimum(1, t / 0.03) * np.minimum(1, (t[-1] - t) / 0.1)
+        return _norm(np.sin(2 * np.pi * np.cumsum(f) / SR) * env, 0.6)
+    if name == "idea":  # light-bulb "ping!"
+        out = np.zeros(int(1.2 * SR), np.float32)
+        place(out, _bell(_hz(91), 1.0, decay=4, bright=0.6), 0.0, 0.6)
+        place(out, _bell(_hz(98), 1.1, decay=3, bright=0.6), 0.09, 0.6)
+        return _norm(out, 0.8)
     if name == "jingle":  # channel intro sting
         out = np.zeros(int(3.2 * SR), np.float32)
         notes = [(72, 0.0), (76, 0.14), (79, 0.28), (84, 0.42), (81, 0.62), (84, 0.76), (88, 0.95)]
@@ -465,5 +507,6 @@ def sfx(name: str, seed: int = 0) -> np.ndarray:
 
 
 SFX_NAMES = ["chime", "twinkle", "pop", "boing", "whoosh", "splash", "knock", "steps",
-             "honk", "slide_up", "slide_down", "ding", "tada", "drumroll", "bonk", "zip", "jingle"]
+             "honk", "slide_up", "slide_down", "ding", "tada", "drumroll", "bonk", "zip", "jingle",
+             "hiccup", "giggle", "bleat", "snore", "tummy", "whistle", "idea"]
 AMBIENCE_NAMES = ["none", "wind", "birds", "night", "rain", "stream", "waves", "fire", "indoor", "city"]

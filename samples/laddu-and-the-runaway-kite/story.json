@@ -1,24 +1,25 @@
 {
  "date": "sample",
- "title": "Pip and the Runaway Kite",
+ "title": "Laddu and the Runaway Kite",
  "theme": "sharing",
  "moral": "When we share, our happiness grows bigger.",
- "description": "Pip the little fox gets a shiny new kite and doesn't want to share it with Tumble. But when the wind carries the kite into the tallest tree, a good friend knows just what to do.",
+ "description": "Laddu gets a shiny new red kite and doesn't want to share it with Chintu. But when the wind carries the kite into the tallest tree, Chintu's wobbly plan and one hungry goat save the day! Count to three with Laddu, Chintu, Golu and Dadaji in this funny animated story about sharing for kids aged 3 to 8.",
  "tags": [
   "kids story",
-  "bedtime story",
+  "cartoon for kids",
   "story for kids",
   "moral story",
   "sharing",
-  "fox",
-  "elephant",
+  "counting",
+  "funny cartoon",
   "animated story",
-  "preschool"
+  "preschool",
+  "indian kids cartoon"
  ],
  "music": "playful",
  "title_scene": 0,
  "thumbnail_scene": 2,
- "thumbnail_text": "Pip's Runaway Kite!",
+ "thumbnail_text": "Laddu's Runaway Kite!",
  "scenes": [
   {
    "time_of_day": "morning",
@@ -32,44 +33,44 @@
    },
    "characters": [
     {
-     "id": "pip",
+     "id": "laddu",
      "x": 760,
      "y": 930,
-     "height": 360,
+     "height": 400,
      "facing": "right",
      "action": "bounce"
     },
     {
-     "id": "tumble",
+     "id": "chintu",
      "x": 1820,
      "to_x": 1330,
-     "start": 6.5,
-     "y": 905,
+     "start": 7.5,
+     "y": 915,
      "height": 420,
      "action": "walk"
     }
    ],
    "narration": [
     {
-     "text": "One sunny morning, Pip the little fox zoomed up Clover Hill with a brand-new red kite."
+     "text": "One sunny morning, Laddu puffed and panted up Masti Hill with a brand-new red kite!"
     },
     {
      "text": "The kite had a long tail with little blue bows. Let's count them together! One... two... three!"
     },
     {
-     "speaker": "pip",
-     "text": "Three bows! Super-duper!"
+     "speaker": "laddu",
+     "text": "Three bows! Arre wah! Now... is it lunch time yet?"
     },
     {
-     "speaker": "tumble",
-     "text": "Wow, Pip! Can I have a turn, please?"
+     "speaker": "chintu",
+     "text": "Wow, Laddu! Can I have a turn, please?"
     },
     {
-     "speaker": "pip",
-     "text": "No! It's my kite. I want to fly it all by myself."
+     "speaker": "laddu",
+     "text": "No way! It's MY kite. I'm flying it all by myself."
     },
     {
-     "text": "Tumble's ears drooped. Uh-oh. That wasn't very kind, was it?"
+     "text": "Chintu's glasses slid down his nose. Uh-oh. That wasn't very kind, was it?"
     }
    ],
    "popups": [
@@ -81,6 +82,12 @@
      "color": "#2F9BE8",
      "count": 3,
      "position": "left"
+    }
+   ],
+   "sfx": [
+    {
+     "at": "line:0",
+     "name": "tummy"
     }
    ]
   },
@@ -97,10 +104,10 @@
    },
    "characters": [
     {
-     "id": "pip",
+     "id": "laddu",
      "x": 1000,
-     "y": 905,
-     "height": 360,
+     "y": 915,
+     "height": 400,
      "facing": "right",
      "action": "wobble"
     }
@@ -121,20 +128,20 @@
    ],
    "narration": [
     {
-     "text": "Suddenly, WHOOSH! A big wind tugged the string right out of Pip's paws."
+     "text": "Suddenly, WHOOSH! A big wind tugged the string right out of Laddu's hands."
     },
     {
      "text": "The kite flew over the stream and got stuck at the very top of the tallest tree."
     },
     {
-     "speaker": "pip",
+     "speaker": "laddu",
      "text": "Oh no! My kite! Don't worry, I'll just jump and get it!"
     },
     {
-     "text": "Boing! Too low. Boing! Still too low. Ka-BONK! Pip bumped right into the tree trunk!"
+     "text": "Boing! Too low. Boing! Still too low. Ka-BONK! Laddu bumped right into the tree trunk!"
     },
     {
-     "text": "How many times did Pip jump? Can you count?",
+     "text": "How many times did Laddu jump? Can you count?",
      "pause": 2.5
     },
     {
@@ -166,54 +173,82 @@
    },
    "characters": [
     {
-     "id": "pip",
-     "x": 760,
-     "y": 915,
-     "height": 360,
+     "id": "laddu",
+     "x": 620,
+     "y": 930,
+     "height": 400,
      "facing": "right",
      "action": "shake"
     },
     {
-     "id": "tumble",
-     "x": 1180,
-     "y": 905,
+     "id": "chintu",
+     "x": 930,
+     "y": 915,
      "height": 420,
      "facing": "right",
      "action": "idle"
+    },
+    {
+     "id": "golu",
+     "x": 1150,
+     "y": 930,
+     "height": 240,
+     "facing": "right",
+     "action": "hop",
+     "enter": "pop",
+     "start": 11.0
     }
    ],
    "sfx": [
     {
-     "at": "line:0",
-     "name": "steps"
-    },
-    {
      "at": "line:1",
-     "name": "honk"
+     "name": "idea"
     },
     {
      "at": "line:2",
-     "name": "slide_up"
+     "name": "bonk"
     },
     {
      "at": "line:3",
-     "name": "pop"
+     "name": "boing"
+    },
+    {
+     "at": "line:4",
+     "name": "bleat"
+    },
+    {
+     "at": "line:5",
+     "name": "slide_down"
+    },
+    {
+     "at": "line:6",
+     "name": "giggle"
     }
    ],
    "narration": [
     {
-     "text": "Then Pip heard big, stompy footsteps. It was Tumble!"
+     "text": "Then Chintu came running, his glasses bouncing."
     },
     {
-     "speaker": "tumble",
-     "text": "Don't worry, Pip. I can help! Oopsie-trunk... HONK!"
+     "speaker": "chintu",
+     "text": "IDEA! I'll climb on your shoulders, Laddu! It's a plan... a slightly wobbly plan!"
     },
     {
-     "text": "Tumble stretched his long trunk up, up, UP... and lifted the kite down safely."
+     "text": "Wibble, wobble, CRASH! The two friends tumbled into a giggly heap."
     },
     {
-     "speaker": "pip",
-     "text": "Thank you, Tumble! I'm sorry I didn't share. Let's fly it together!"
+     "text": "Just then, Golu the goat trotted up and gave the tree a mighty head-butt!"
+    },
+    {
+     "speaker": "golu",
+     "text": "Ba-a-a-a!"
+    },
+    {
+     "text": "Down floated the red kite, right into Laddu's arms. And Golu tried to eat the tail!"
+    },
+    {
+     "speaker": "laddu",
+     "text": "Thank you, Chintu! Sorry I didn't share. Let's fly it together!"
     }
    ]
   },
@@ -230,46 +265,46 @@
    },
    "characters": [
     {
-     "id": "pip",
-     "x": 700,
-     "y": 930,
-     "height": 360,
+     "id": "laddu",
+     "x": 640,
+     "y": 935,
+     "height": 400,
      "facing": "right",
      "action": "dance"
     },
     {
-     "id": "tumble",
-     "x": 1000,
-     "y": 920,
+     "id": "chintu",
+     "x": 930,
+     "y": 925,
      "height": 420,
      "facing": "left",
      "action": "bounce"
     },
     {
-     "id": "nana",
-     "x": 1450,
-     "y": 905,
-     "height": 400,
+     "id": "dadaji",
+     "x": 1420,
+     "y": 930,
+     "height": 470,
      "facing": "left",
-     "action": "idle"
+     "action": "laugh"
     }
    ],
    "sfx": [],
    "narration": [
     {
-     "text": "That evening, the friends took turns flying the red kite on Clover Hill."
+     "text": "That evening, the two friends took turns flying the red kite on Masti Hill."
     },
     {
-     "speaker": "nana",
-     "text": "Hoo-hoo-HOO! Look at you two! A happy thing grows bigger when we share it."
+     "speaker": "dadaji",
+     "text": "Ho ho HO! Look at you two! A happy thing grows bigger when we share it."
     },
     {
      "text": "Let's remember! How many blue bows were on the kite?",
      "pause": 2.5
     },
     {
-     "speaker": "pip",
-     "text": "Three! One, two, three! Sharing is the best!"
+     "speaker": "laddu",
+     "text": "Three! One, two, three! Sharing is the best... and so are jalebis!"
     },
     {
      "text": "And the little red kite flew higher than ever before."

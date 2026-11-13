@@ -1,0 +1,35 @@
+{
+ "id": "golu",
+ "name": "Golu",
+ "species": "naughty little pet goat",
+ "personality": "cheeky, always hungry, eats EVERYTHING (homework, kites, Dadaji's turban tassel). FUNNY: only says 'Ba-a-a-a!' in different moods, and somehow everyone understands him; head-butts things at the worst moment; his bell jingles when he sneaks",
+ "look": "small white goat with brown patches, tiny curved horns, little beard, big floppy ears, blue collar with a golden bell",
+ "voice": {
+  "name": "en-US-AnaNeural",
+  "rate": "+10%",
+  "pitch": "+0Hz",
+  "shift": 5.0,
+  "backup": {
+   "voice": "af_sky",
+   "speed": 1.1,
+   "shift": 6.0
+  }
+ },
+ "viewbox": [
+  440,
+  440
+ ],
+ "neck": [
+  300,
+  230
+ ],
+ "parts": {
+  "body": "<defs><radialGradient id=\"gb\" cx=\"40%\" cy=\"30%\" r=\"80%\"><stop offset=\"0\" stop-color=\"#FFFFFF\"/><stop offset=\"1\" stop-color=\"#DCD6CC\"/></radialGradient></defs>\n<path d=\"M92 250 q-34 -20 -22 -52 q16 22 34 26z\" fill=\"#F4F0E8\"/>\n<rect x=\"118\" y=\"320\" width=\"26\" height=\"100\" rx=\"12\" fill=\"#EDE7DC\"/><rect x=\"164\" y=\"330\" width=\"26\" height=\"92\" rx=\"12\" fill=\"#E2DACE\"/>\n<rect x=\"250\" y=\"320\" width=\"26\" height=\"100\" rx=\"12\" fill=\"#EDE7DC\"/><rect x=\"292\" y=\"330\" width=\"26\" height=\"92\" rx=\"12\" fill=\"#E2DACE\"/>\n<g fill=\"#5A3A28\"><rect x=\"116\" y=\"410\" width=\"30\" height=\"18\" rx=\"6\"/><rect x=\"162\" y=\"410\" width=\"30\" height=\"18\" rx=\"6\"/><rect x=\"248\" y=\"410\" width=\"30\" height=\"18\" rx=\"6\"/><rect x=\"290\" y=\"410\" width=\"30\" height=\"18\" rx=\"6\"/></g>\n<ellipse cx=\"212\" cy=\"290\" rx=\"128\" ry=\"78\" fill=\"url(#gb)\"/>\n<ellipse cx=\"170\" cy=\"270\" rx=\"44\" ry=\"30\" fill=\"#B07A4E\" opacity=\".85\"/><ellipse cx=\"260\" cy=\"318\" rx=\"30\" ry=\"20\" fill=\"#B07A4E\" opacity=\".8\"/>\n<path d=\"M270 230 q34 -10 56 16 l-6 30 q-28 -8 -50 6z\" fill=\"url(#gb)\"/>\n<path d=\"M272 254 q30 -6 52 12\" stroke=\"#2E7BD0\" stroke-width=\"12\" fill=\"none\" stroke-linecap=\"round\"/>\n<circle cx=\"300\" cy=\"278\" r=\"13\" fill=\"#FFCB2E\" stroke=\"#C9940A\" stroke-width=\"3\"/><path d=\"M294 282 h12\" stroke=\"#8A6200\" stroke-width=\"3\"/>",
+  "head": "<defs><radialGradient id=\"gh\" cx=\"40%\" cy=\"30%\" r=\"80%\"><stop offset=\"0\" stop-color=\"#FFFFFF\"/><stop offset=\"1\" stop-color=\"#DED8CE\"/></radialGradient></defs>\n<path d=\"M262 120 q-12 -46 18 -60 q-6 30 4 54z\" fill=\"#9C8B78\"/><path d=\"M338 120 q12 -46 -18 -60 q6 30 -4 54z\" fill=\"#9C8B78\"/>\n<path d=\"M258 140 q-58 -2 -70 32 q34 12 70 -8z\" fill=\"#EEE8DE\"/><path d=\"M342 140 q58 -2 70 32 q-34 12 -70 -8z\" fill=\"#EEE8DE\"/>\n<path d=\"M248 154 q-40 4 -50 18 q24 4 52 -6z\" fill=\"#F5B8C0\"/><path d=\"M352 154 q40 4 50 18 q-24 4 -52 -6z\" fill=\"#F5B8C0\"/>\n<path d=\"M300 98 C352 98 370 140 364 186 C356 236 330 262 300 262 C270 262 244 236 236 186 C230 140 248 98 300 98Z\" fill=\"url(#gh)\"/>\n<path d=\"M272 108 q28 -18 60 2 q-10 24 -30 22 q-22 -2 -30 -24z\" fill=\"#B07A4E\" opacity=\".85\"/>\n<ellipse cx=\"300\" cy=\"228\" rx=\"40\" ry=\"28\" fill=\"#F3E6DA\"/>\n<ellipse cx=\"288\" cy=\"220\" rx=\"5\" ry=\"7\" fill=\"#6E4A3A\"/><ellipse cx=\"312\" cy=\"220\" rx=\"5\" ry=\"7\" fill=\"#6E4A3A\"/>\n<path d=\"M286 258 q14 40 28 0 q-6 16 -14 24 q-8 -8 -14 -24z\" fill=\"#EDE5D8\"/>",
+  "eyes_open": "<ellipse cx=\"270\" cy=\"172\" rx=\"17\" ry=\"20\" fill=\"#fff\"/><ellipse cx=\"330\" cy=\"172\" rx=\"17\" ry=\"20\" fill=\"#fff\"/><ellipse cx=\"272\" cy=\"175\" rx=\"12\" ry=\"15\" fill=\"#2B1A12\"/><ellipse cx=\"332\" cy=\"175\" rx=\"12\" ry=\"15\" fill=\"#2B1A12\"/><circle cx=\"278\" cy=\"167\" r=\"5\" fill=\"#fff\"/><circle cx=\"338\" cy=\"167\" r=\"5\" fill=\"#fff\"/>",
+  "eyes_closed": "<path d=\"M254 174 Q270 186 286 174 M314 174 Q330 186 346 174\" stroke=\"#2B1A12\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\"/>",
+  "mouth_closed": "<path d=\"M288 240 Q300 250 312 240\" stroke=\"#6E4A3A\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\"/>",
+  "mouth_open": "<path d=\"M284 236 Q300 234 316 236 Q312 262 300 264 Q288 262 284 236Z\" fill=\"#7A2E2E\"/><ellipse cx=\"300\" cy=\"256\" rx=\"9\" ry=\"5\" fill=\"#F27B80\"/>"
+ },
+ "size": 0.58
+}

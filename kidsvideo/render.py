@@ -529,7 +529,7 @@ class IntroRenderer:
         xs = {1: [960], 2: [760, 1160], 3: [600, 960, 1320]}.get(len(cast), [])
         self.cast = []
         for i, (cid, xx) in enumerate(zip(cast, xs)):
-            h = int(400 * H / 1080)
+            h = int(400 * H / 1080 * float(characters[cid].get("size", 1.0)))
             spr = rig.Sprite(characters[cid], h, "right" if xx < 960 else "left", "day", seed=i * 7)
             self.cast.append((spr, xx * W / 1920, 2.0 + i * 0.22))
         self.confetti = Particles("confetti", W, H, 5)

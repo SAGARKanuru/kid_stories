@@ -62,7 +62,8 @@ sky = f'''{DEFS}<defs><radialGradient id="bg" cx="50%" cy="38%" r="75%"><stop of
 <path d="M0 640 C200 585 600 585 800 640 L800 652 C600 600 200 600 0 652Z" fill="#8BD58A" opacity=".6"/>'''
 pp = svgtools.render(sky, P, P, 800, 800)
 # lantern string from Pip's paw
-place(pp, "pip", 470, 730, 470, "left", mouth=True)
+place(pp, "golu", 545, 728, 175, "left")
+place(pp, "laddu", 370, 742, 460, "right", mouth=True)
 fireflies(pp, 6, (60, 420, 300, 600)); fireflies(pp, 4, (600, 260, 760, 560))
 # circular mask preview
 pp.convert("RGB").save(OUT + "profile-picture-800.png")
@@ -107,16 +108,18 @@ banner_svg = f'''{DEFS}<defs><linearGradient id="bs" x1="0" y1="0" x2="0" y2="1"
 bn = svgtools.render(banner_svg, BW, BH, BW, BH)
 fireflies(bn, 40, (100, 420, 2460, 1000), 1.3)
 # characters on the left of the safe area (x 507-2053, y 508-931)
-place(bn, "tumble", 760, 928, 380, "right")
-place(bn, "pip", 600, 928, 330, "right", mouth=True)
-place(bn, "nana", 935, 928, 350, "left")
+place(bn, "dadaji", 1000, 928, 400, "left")
+place(bn, "pinky", 580, 932, 330, "right", mouth=True)
+place(bn, "chintu", 715, 936, 345, "right")
+place(bn, "laddu", 860, 940, 335, "left", mouth=True)
+place(bn, "golu", 1100, 936, 175, "left")
 # title on the right of the safe area
-t1 = text_block("Little Lantern Stories", 1000, 118, fill=(255, 236, 140), stroke=(52, 30, 90))
-t2 = text_block("A new animated story every day!", 1000, 58, fill=(255, 255, 255), stroke=(52, 30, 90), weight="SemiBold")
-tx = 1060 + (2040 - 1060 - t1.width) // 2
+t1 = text_block("Little Lantern Stories", 900, 118, fill=(255, 236, 140), stroke=(52, 30, 90))
+t2 = text_block("A new funny story every day!", 900, 58, fill=(255, 255, 255), stroke=(52, 30, 90), weight="SemiBold")
+tx = 1130 + (2050 - 1130 - t1.width) // 2
 ty = 530
-bn.alpha_composite(t1, (max(1050, tx), ty))
-bn.alpha_composite(t2, (1060 + (2040 - 1060 - t2.width) // 2, ty + t1.height - 28))
+bn.alpha_composite(t1, (max(1120, tx), ty))
+bn.alpha_composite(t2, (1130 + (2050 - 1130 - t2.width) // 2, ty + t1.height - 28))
 bn.convert("RGB").save(OUT + "channel-banner-2560x1440.png")
 # safe-area guide preview
 g = bn.copy(); d = ImageDraw.Draw(g)

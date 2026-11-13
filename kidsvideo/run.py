@@ -41,11 +41,19 @@ def commit_record(ep: Path):
     if run("diff", "--cached", "--quiet").returncode == 0:
         return
     run("commit", "-m", f"Record uploaded episode {ep.name} [skip ci]")
-    for _ in range(4):
-        if run("push").returncode == 0:
+    err = ""
+    for i in range(5):
+        r = run("push", "origin", "HEAD:main")
+        if r.returncode == 0:
             return
-        run("pull", "--rebase", "-q")
-    print(f"::warning::could not push the upload record for {ep.name}")
+        err = (r.stderr or r.stdout)[-300:]
+        p = run("pull", "--rebase", "--autostash", "-q", "origin", "main")
+        if p.returncode != 0:
+            err += " | " + (p.stderr or p.stdout)[-300:]
+            run("rebase", "--abort")
+        import time
+        time.sleep(3 * (i + 1))
+    print(f"::warning::could not push the upload record for {ep.name}: {err}")
 
 
 def main():

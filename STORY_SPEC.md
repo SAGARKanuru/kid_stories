@@ -20,7 +20,8 @@ If an episode for today already exists, do nothing.
 - Simple words, short sentences, lots of repetition and plenty of humour (see "Make it funny" below). Read-aloud rhythm.
 - The narrator is a cheerful **kid** telling the story to friends, voiced by a child voice. Write narration the way an excited child would tell it: "Uh-oh!", "Guess what happened next?", "Whoooosh!", "Can you count the apples with me? One, two, three!" Ask the viewer one or two little questions per episode and pause-worthy moments. Avoid long, formal sentences.
 - The video opens with "Hi friends! Welcome to <channel>! Today's story is… <title>!" and ends with the moral plus "See you tomorrow… bye-bye!" automatically. To customise, add optional top-level `"intro"` / `"outro"` strings in the same friendly kid voice.
-- No human child characters; the cast are animals. Grown-up helpers are animals too (e.g. Nana Hoot).
+- The world is **Masti Nagar**, a colourful, happy Indian village-town: mango trees, a chai stall, a sweet shop with jalebis, a pond with lotus flowers, a market with bright awnings, a school, a banyan tree, kite festival skies, rangoli, rickshaws, cows and parrots. Use Indian settings, food, games (kite flying, gilli-danda, hopscotch, cricket in the lane) and festivals (Diwali lamps, Holi colours) naturally — warm and respectful, never stereotyped. Keep English simple; a few friendly Hindi words are fine (arre, wah, chalo, dost, accha).
+- The heroes are a gang of kids with a grandpa and a pet goat (see "The cast"). Slapstick energy like classic Indian cartoon duos — big reactions, chases, silly plans gone wrong — but always kind, with no real danger and no copying of any existing show's characters, names, catchphrases or songs.
 - 8–10 scenes, 380–600 words of narration in total (≈3–4 minutes). Each scene 2–5 lines.
 - Mix narrator lines and short character lines (character lines are voiced by that character and their mouth moves). A speaking character **must** be placed in that scene.
 
@@ -34,8 +35,10 @@ Comedy for 3–8 year olds is physical, silly and surprising — never mean:
 - **Rule of three**: try something twice and fail the same funny way, the third time it works (or fails even sillier).
 - **Silly sounds & words**: "Ka-BOING!", "Wibble-wobble!", "SPLOOSH!", made-up words, a funny noise each character makes.
 - **Wrong guesses**: a character confidently says the wrong answer ("A triangle has… seventeen sides!") and the narrator or friend gently giggles and corrects it — kids love knowing better.
-- **Running gag** using the cast's quirks (see `characters/*.json` personality): Tumble's trunk HONK and giant sneeze, Pip mixing up big words, Nana's slipping glasses and "I'm awake!".
-- **Surprise reveal**: the "monster" is just a hiccupping frog; the mystery noise is Tumble's tummy rumbling.
+- **Running gags** using the cast's quirks (see `characters/*.json` personality): Laddu thinking about jalebis at the worst moment and his rumbling tummy (`tummy` sfx); Chintu's "IDEA!" (`idea` sfx) whose first plan always goes hilariously wrong; Pinky's super-loud whistle (`whistle`) and "Leave it to Pinky!"; Dadaji's wiggly moustache, "Ho ho HO!" and dozing off (`snore`) then "I'm awake!"; Golu the goat eating things he shouldn't and only saying "Ba-a-a-a!" (`bleat`).
+- **Funny duo**: Laddu and Chintu are the comedy pair — big & small, slow & fast, hungry & clever. Give them at least one double-act moment per episode (a chase, a tug-of-war, a wobbly tower, a mix-up where each misunderstands the other).
+- **Surprise reveal**: the "ghost" is just Golu wearing a bedsheet; the mystery noise is Laddu's tummy rumbling.
+- **Aim for 7+ laugh moments** per episode, and end on a final joke after the moral (Golu eats the "The End" banner, Laddu asks for jalebis).
 - The narrator can be cheeky: "Uh-oh… you know what happens next, don't you?"
 - Keep it kind: no laughing AT someone's looks or mistakes in a mean way, no toilet humour, no scary pranks.
 
@@ -53,7 +56,7 @@ Comedy for 3–8 year olds is physical, silly and surprising — never mean:
 ```jsonc
 {
   "date": "2026-10-07",
-  "title": "Pip and the Runaway Kite",          // ≤ 60 chars, catchy, includes a character name
+  "title": "Laddu and the Runaway Kite",          // ≤ 60 chars, catchy, includes a character name
   "theme": "sharing",
   "learning": "counting 1 to 5",                    // ONE topic from config.yaml learning_topics
   "moral": "When we share, our happiness grows bigger.",   // one short sentence
@@ -62,7 +65,7 @@ Comedy for 3–8 year olds is physical, silly and surprising — never mean:
   "music": "gentle",           // gentle | playful | dreamy | adventurous
   "title_scene": 0,            // scene used behind the title card
   "thumbnail_scene": 2,        // most eye-catching scene
-  "thumbnail_text": "Pip's Runaway Kite!",       // ≤ 4 words, big and exciting
+  "thumbnail_text": "Laddu's Runaway Kite!",       // ≤ 4 words, big and exciting
   "scenes": [
     {
       "time_of_day": "morning",   // day | morning | sunset | night | indoor
@@ -70,18 +73,18 @@ Comedy for 3–8 year olds is physical, silly and surprising — never mean:
       "ambience": "birds",        // none | wind | birds | night | rain | stream | waves | fire | indoor | city
       "particles": "dust",        // none | fireflies | sparkles | leaves | snow | rain | bubbles | dust | petals | confetti
       "transition": "fade",       // into this scene: fade | fadeblack | smoothleft | smoothright | circleopen | dissolve | wipeleft
-      "sfx": [{"at": "line:0", "name": "whoosh"}],   // at "line:N" or seconds; chime twinkle pop boing whoosh splash knock steps honk slide_up slide_down ding tada drumroll bonk zip
+      "sfx": [{"at": "line:0", "name": "whoosh"}],   // at "line:N" or seconds; chime twinkle pop boing whoosh splash knock steps honk slide_up slide_down ding tada drumroll bonk zip hiccup giggle bleat snore tummy whistle idea
       "popups": [                                    // learning cards that pop up at the top of the screen
         {"at": "line:1", "text": "3", "sub": "three apples", "shape": "circle", "color": "#E8414E", "count": 3}
       ],
       "layers": { "sky": "<svg>…</svg>", "mid": "<svg>…</svg>", "fore": "<svg>…</svg>" },
       "characters": [
-        {"id": "pip", "x": 760, "y": 930, "height": 360, "facing": "right", "action": "bounce"},
-        {"id": "tumble", "x": 1820, "to_x": 1330, "start": 6.5, "y": 905, "height": 420, "action": "walk"}
+        {"id": "laddu", "x": 760, "y": 930, "height": 400, "facing": "right", "action": "bounce"},
+        {"id": "chintu", "x": 1820, "to_x": 1330, "start": 6.5, "y": 915, "height": 420, "action": "walk"}
       ],
       "narration": [
-        {"text": "One sunny morning, Pip ran up Clover Hill with a brand-new red kite."},
-        {"speaker": "tumble", "text": "Wow, Pip! Can I have a turn, please?"},
+        {"text": "One sunny morning, Laddu puffed up Masti Hill with a brand-new red kite!"},
+        {"speaker": "chintu", "text": "Wow, Laddu! Can I have a turn, please?"},
         {"text": "How many apples can YOU count? Let's count together!", "pause": 2.5}
       ]
     }
@@ -110,14 +113,14 @@ The renderer already adds bold cartoon outlines, saturated colours, squash-and-s
 The text-to-speech reads punctuation, so write for the ear: short sentences, lots of "!" for excitement, "..." for a suspense pause, sound words in caps ("BOING!", "SPLOOSH!"), and stretch fun words ("Whoooosh!", "Yummmmy!"). Avoid brackets, emojis, abbreviations and long numbers.
 
 ### Character actions for comedy
-`idle`, `bounce`, `hop`, `walk`, `sleep`, plus `shake` (surprised / giggling), `wobble` (dizzy, silly), `dance` (celebrating).
+`idle`, `bounce`, `hop`, `walk`, `sleep`, plus `shake` (surprised / giggling), `wobble` (dizzy, silly), `dance` (celebrating), `spin` (twirl / turn around in surprise), `laugh` (belly laugh with happy eyes).
 
 Vary `camera`, `time_of_day` and settings across the episode so it feels like a film. Use `transition: "fadeblack"` for a time jump (e.g. "That night…"). Add 3–6 sound effects per episode where they match the action.
 
 ### Character placement
 
 - Coordinates are in the 1920×1080 design space. `x` = horizontal centre of the character, `y` = where the feet touch the ground.
-- Typical heights: Pip 340–380, Tumble 400–440, Nana Hoot 380–420. Keep feet `y` between 860 and 980 and on the ground drawn in the `mid` layer.
+- Typical heights: Laddu 380–420, Chintu 400–440, Pinky 380–420, Dadaji 450–490, Golu 220–260. Keep feet `y` between 860 and 980 and on the ground drawn in the `mid` layer.
 - Keep characters inside x 250–1670 unless they are walking in/out.
 - `action`: `idle` (breathing, small head moves), `bounce` (happy/excited), `hop` (jumping), `walk` (needs `to_x`, optional `start` seconds), `sleep` (eyes closed, slow breathing).
 - Characters face each other when talking. Up to 3 characters per scene.
@@ -139,16 +142,26 @@ Style guide — soft, warm storybook look like the sample:
 - Props tied to a character (a kite string to a paw, an umbrella) go in `mid`; put them where the character will be. Remember characters are drawn on top of `mid`, so props must sit beside/above them, not behind them.
 - Reuse a layer string across scenes when the story stays in the same place (change props or camera to keep it fresh).
 
-See `samples/pip-and-the-runaway-kite/story.json` for a complete working example.
+See `samples/laddu-and-the-runaway-kite/story.json` for a complete working example.
 
 ## The cast
 
-Use the recurring characters in `characters/` — consistency builds a channel. Most episodes should star 2–3 of them. Read their `personality` and keep them in character.
+Use the recurring characters in `characters/` — consistency builds a channel. Read their `personality` and keep them in character:
+
+| id | Who | Comedy |
+|---|---|---|
+| `laddu` | Chubby, cheerful boy in a yellow kurta, always hungry | jalebi thoughts at the worst time, rumbling tummy, rolls like a ball, "Arre wah, jalebi time!" |
+| `chintu` | Thin, clever boy with big round glasses | shouts "IDEA!", first plan always goes wrong, glasses slide off, "a slightly wobbly plan!" |
+| `pinky` | Brave, sporty girl with red-ribbon pigtails | eye-rolls at the boys, then does something sillier; ear-splitting whistle; "Leave it to Pinky!" |
+| `dadaji` | Wise grandpa with orange turban and huge white moustache | moustache wiggles, "Ho ho HO!", dozes off mid-sentence, hunts for glasses on his head |
+| `golu` | Naughty pet goat with a bell | eats everything, head-butts at the worst moment, only says "Ba-a-a-a!" |
+
+Most episodes star Laddu and Chintu plus 1–2 others; use Golu often (kids love him). Old characters in `characters/retired/` must not be used.
 
 You may add **one** new character when the story truly needs it (e.g. a lost duckling). Draw it in `characters/<id>.json` in the same format and style as the existing ones:
 
 - `viewbox` [400, 520] (wider animals up to 440), feet at the bottom centre, `neck` = the point the head pivots around.
 - `parts` (each is SVG markup in that viewbox, no outer `<svg>`): `body` (incl. legs, arms, tail, clothing), `head` (head shape, ears, nose, cheeks — no eyes or mouth), `eyes_open`, `eyes_closed`, `mouth_closed`, `mouth_open`. They are stacked in that order.
-- Big glossy eyes with white highlights, rosy cheeks, soft gradients — match Pip/Tumble/Nana.
+- Big glossy eyes with white highlights, rosy cheeks, soft gradients — match Laddu/Chintu/Pinky/Dadaji/Golu.
 - `voice`: an edge-tts voice, e.g. `en-US-AnaNeural` (child), `en-GB-MaisieNeural` (child), `en-US-GuyNeural`, `en-GB-RyanNeural`, `en-US-AriaNeural`, `en-AU-NatashaNeural`, with `rate`/`pitch` tweaks to make it distinct.
 - Render it with the check script and look at it before using it.

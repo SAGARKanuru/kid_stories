@@ -21,6 +21,8 @@ def load_character(cid: str, extra: dict | None = None) -> dict:
         return extra[cid]
     path = ROOT / "characters" / f"{cid}.json"
     if not path.exists():
+        path = ROOT / "characters" / "retired" / f"{cid}.json"
+    if not path.exists():
         raise FileNotFoundError(f"character '{cid}' not found in characters/")
     return json.loads(path.read_text())
 
@@ -187,6 +189,15 @@ class Sprite:
             dy, sx, sy = jump(0.8, 0.06)
             tilt = 7.0 * math.sin(2 * math.pi * t * 0.8)
             head_angle = -tilt
+            happy = True
+        elif action == "spin":  # comic twirl: squash to a sliver and back, like turning around
+            ph = (t * 0.7) % 1.0
+            sx = max(0.08, abs(math.cos(2 * math.pi * ph)))
+            dy = -abs(math.sin(2 * math.pi * ph)) * 0.05 * H
+        elif action == "laugh":  # belly laugh
+            dy, sx, sy = jump(2.2, 0.015)
+            tilt = 3 * math.sin(2 * math.pi * t * 2.2)
+            head_angle = -6 + 4 * math.sin(2 * math.pi * t * 4.4)
             happy = True
         elif action == "sleep":
             head_angle = 6 + 1.5 * math.sin(2 * math.pi * t / 4.0)

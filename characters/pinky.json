@@ -1,0 +1,34 @@
+{
+ "id": "pinky",
+ "name": "Pinky",
+ "species": "brave, sporty village girl (about 8 years old)",
+ "personality": "brave, bossy-but-kind leader, fastest runner in town, solves problems. FUNNY: rolls her eyes at the boys' silly plans, then does something even sillier herself; super-loud whistle that makes birds fall out of trees; catchphrase 'Leave it to Pinky!'",
+ "look": "girl with warm brown skin, two bouncy black pigtails with red ribbons, pink frock with white polka dots, yellow leggings, white sneakers, star-shaped hair clip",
+ "voice": {
+  "name": "en-IN-NeerjaNeural",
+  "rate": "+2%",
+  "pitch": "+0Hz",
+  "shift": 4.0,
+  "backup": {
+   "voice": "af_bella",
+   "speed": 1.02,
+   "shift": 4.0
+  }
+ },
+ "viewbox": [
+  400,
+  520
+ ],
+ "neck": [
+  200,
+  270
+ ],
+ "parts": {
+  "body": "<defs><radialGradient id=\"ps\" cx=\"42%\" cy=\"32%\" r=\"75%\"><stop offset=\"0\" stop-color=\"#E7AD80\"/><stop offset=\"1\" stop-color=\"#B9774B\"/></radialGradient><radialGradient id=\"pf\" cx=\"45%\" cy=\"25%\" r=\"80%\"><stop offset=\"0\" stop-color=\"#FF8FC2\"/><stop offset=\"1\" stop-color=\"#E5458E\"/></radialGradient></defs>\n<rect x=\"164\" y=\"410\" width=\"28\" height=\"84\" rx=\"13\" fill=\"#FFD23F\"/><rect x=\"208\" y=\"410\" width=\"28\" height=\"84\" rx=\"13\" fill=\"#FFD23F\"/>\n<path d=\"M144 490 q32 -22 60 -2 v14 h-60z M196 488 q30 -20 60 2 v12 h-60z\" fill=\"#fff\"/><path d=\"M144 500 h60 M196 500 h60\" stroke=\"#E5458E\" stroke-width=\"5\"/>\n<path d=\"M158 276 Q200 262 242 276 L284 430 Q200 452 116 430Z\" fill=\"url(#pf)\"/>\n<g fill=\"#fff\" opacity=\".9\"><circle cx=\"170\" cy=\"330\" r=\"7\"/><circle cx=\"214\" cy=\"306\" r=\"7\"/><circle cx=\"236\" cy=\"360\" r=\"7\"/><circle cx=\"184\" cy=\"392\" r=\"7\"/><circle cx=\"148\" cy=\"410\" r=\"7\"/><circle cx=\"256\" cy=\"414\" r=\"7\"/><circle cx=\"210\" cy=\"424\" r=\"6\"/></g>\n<path d=\"M118 428 Q200 450 282 428\" stroke=\"#C02E70\" stroke-width=\"7\" fill=\"none\"/>\n<path d=\"M160 282 Q126 304 116 352 L134 358 Q144 316 168 300Z\" fill=\"url(#pf)\"/><path d=\"M240 282 Q274 304 284 352 L266 358 Q256 316 232 300Z\" fill=\"url(#pf)\"/>\n<rect x=\"112\" y=\"350\" width=\"22\" height=\"56\" rx=\"11\" fill=\"url(#ps)\"/><rect x=\"266\" y=\"350\" width=\"22\" height=\"56\" rx=\"11\" fill=\"url(#ps)\"/>\n<circle cx=\"123\" cy=\"408\" r=\"15\" fill=\"url(#ps)\"/><circle cx=\"277\" cy=\"408\" r=\"15\" fill=\"url(#ps)\"/>",
+  "head": "<defs><radialGradient id=\"ph\" cx=\"42%\" cy=\"32%\" r=\"75%\"><stop offset=\"0\" stop-color=\"#E7AD80\"/><stop offset=\"1\" stop-color=\"#B9774B\"/></radialGradient></defs>\n<path d=\"M88 150 C40 170 40 250 70 290 C84 300 96 290 92 276 C76 240 86 196 108 172Z\" fill=\"#1A1412\"/>\n<path d=\"M312 150 C360 170 360 250 330 290 C316 300 304 290 308 276 C324 240 314 196 292 172Z\" fill=\"#1A1412\"/>\n<path d=\"M72 150 l-26 -16 l4 30z M72 150 l-30 12 l20 18z\" fill=\"#E8283C\"/><circle cx=\"72\" cy=\"152\" r=\"9\" fill=\"#C0172A\"/>\n<path d=\"M328 150 l26 -16 l-4 30z M328 150 l30 12 l-20 18z\" fill=\"#E8283C\"/><circle cx=\"328\" cy=\"152\" r=\"9\" fill=\"#C0172A\"/>\n<ellipse cx=\"200\" cy=\"176\" rx=\"118\" ry=\"112\" fill=\"url(#ph)\"/>\n<path d=\"M80 184 C70 104 120 56 200 54 C280 56 330 104 320 184 C312 150 296 130 270 120 C240 132 222 128 204 112 C180 136 146 146 110 136 C96 148 86 164 80 184Z\" fill=\"#1A1412\"/><path d=\"M128 84 C154 68 186 62 218 64\" stroke=\"#3E302A\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\" opacity=\".7\"/>\n<path d=\"M262 86 l8 16 l18 2 l-13 12 l4 18 l-17 -9 l-16 9 l3 -18 l-13 -12 l18 -2z\" fill=\"#FFD23F\" stroke=\"#E0A800\" stroke-width=\"2\"/>\n<ellipse cx=\"128\" cy=\"226\" rx=\"24\" ry=\"14\" fill=\"#F07C6E\" opacity=\".55\"/><ellipse cx=\"272\" cy=\"226\" rx=\"24\" ry=\"14\" fill=\"#F07C6E\" opacity=\".55\"/>\n<path d=\"M194 196 q8 18 16 4\" stroke=\"#8E4E2A\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\"/>",
+  "eyes_open": "<ellipse cx=\"158\" cy=\"168\" rx=\"24\" ry=\"28\" fill=\"#fff\"/><ellipse cx=\"242\" cy=\"168\" rx=\"24\" ry=\"28\" fill=\"#fff\"/><ellipse cx=\"161\" cy=\"171\" rx=\"17\" ry=\"22\" fill=\"#2B1A12\"/><ellipse cx=\"245\" cy=\"171\" rx=\"17\" ry=\"22\" fill=\"#2B1A12\"/><circle cx=\"168\" cy=\"161\" r=\"7.5\" fill=\"#fff\"/><circle cx=\"252\" cy=\"161\" r=\"7.5\" fill=\"#fff\"/><circle cx=\"154\" cy=\"180\" r=\"3.5\" fill=\"#fff\" opacity=\".8\"/><circle cx=\"238\" cy=\"180\" r=\"3.5\" fill=\"#fff\" opacity=\".8\"/><path d=\"M128 142 l-10 -8 M134 134 l-6 -10 M272 142 l10 -8 M266 134 l6 -10\" stroke=\"#1A1412\" stroke-width=\"5\" stroke-linecap=\"round\"/>",
+  "eyes_closed": "<path d=\"M136 172 Q158 188 180 172\" stroke=\"#2B1A12\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M220 172 Q242 188 264 172\" stroke=\"#2B1A12\" stroke-width=\"7\" fill=\"none\" stroke-linecap=\"round\"/>",
+  "mouth_closed": "<path d=\"M174 236 Q200 260 226 236\" stroke=\"#9E2A3A\" stroke-width=\"6\" fill=\"none\" stroke-linecap=\"round\"/>",
+  "mouth_open": "<path d=\"M172 232 Q200 228 228 232 Q224 272 200 274 Q176 272 172 232Z\" fill=\"#7A1E2A\"/><path d=\"M178 234 h44 v8 q-22 5 -44 0z\" fill=\"#fff\"/><ellipse cx=\"200\" cy=\"264\" rx=\"14\" ry=\"7\" fill=\"#F27B80\"/>"
+ }
+}
