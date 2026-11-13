@@ -98,13 +98,15 @@ def already_uploaded(story: dict) -> dict | None:
             "duplicates": [f"https://youtu.be/{x}" for x in extra]}
 
 
-def remove_duplicates(protect: set) -> list:
-    """Delete extra copies of videos uploaded more than once (same exact title).
+def remove_duplicates(protect: set, episode_titles: set) -> list:
+    """Delete extra copies of THIS PIPELINE'S episodes uploaded more than once (same exact title).
+    Only titles of our own episodes are considered - videos the channel owner uploaded are never touched.
     Keeps the copy an episode record points to (protect), otherwise the first one uploaded."""
     yt = _client()
     groups = {}
     for v in recent_uploads(yt):
-        groups.setdefault(v["title"], []).append(v)
+        if v["title"] in episode_titles:
+            groups.setdefault(v["title"], []).append(v)
     deleted = []
     for title, vids in groups.items():
         if len(vids) < 2:

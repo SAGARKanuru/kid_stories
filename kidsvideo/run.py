@@ -77,8 +77,17 @@ def main():
                 protect.add(json.loads(f.read_text())["video_id"])
             except Exception:
                 pass
+        titles = set()
+        for f in (ROOT / "episodes").glob("*/story.json"):
+            try:
+                titles.add(json.loads(f.read_text())["title"][:100])
+            except Exception:
+                pass
+        hist = ROOT / "data" / "history.json"
+        if hist.exists():
+            titles |= {h["title"][:100] for h in json.loads(hist.read_text()) if h.get("title")}
         try:
-            gone = remove_duplicates(protect)
+            gone = remove_duplicates(protect, titles)
             if gone:
                 print(f"Removed {len(gone)} duplicate video(s) from the channel")
         except Exception as e:
