@@ -1,10 +1,7 @@
 name: Voice samples
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths: ["kidsvideo/sound.py", "tools/tts_check.py", ".github/workflows/voice-samples.yml"]
+  workflow_dispatch:      # run it by hand from the Actions tab when you want to hear the voices
 
 jobs:
   samples:
@@ -27,6 +24,7 @@ jobs:
       - name: Check both voice engines
         run: python tools/tts_check.py
       - uses: actions/upload-artifact@v4
+        continue-on-error: true   # never fail just because GitHub's file storage is full
         with:
           name: voice-samples
           path: voice-samples/*.wav
