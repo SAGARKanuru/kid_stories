@@ -83,4 +83,5 @@ youtube:
   made_for_kids: true            # required for children's content (COPPA)
   contains_synthetic_media: true # discloses AI-generated story, art and voices
   default_language: "en"
+  delete_duplicates: true        # remove extra copies of a video uploaded more than once (keeps one)
   playlist_id: ""                # optional: add each upload to this playlist

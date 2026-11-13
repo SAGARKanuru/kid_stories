@@ -98,6 +98,33 @@ def already_uploaded(story: dict) -> dict | None:
             "duplicates": [f"https://youtu.be/{x}" for x in extra]}
 
 
+def remove_duplicates(protect: set) -> list:
+    """Delete extra copies of videos uploaded more than once (same exact title).
+    Keeps the copy an episode record points to (protect), otherwise the first one uploaded."""
+    yt = _client()
+    groups = {}
+    for v in recent_uploads(yt):
+        groups.setdefault(v["title"], []).append(v)
+    deleted = []
+    for title, vids in groups.items():
+        if len(vids) < 2:
+            continue
+        keep = next((v for v in vids if v["id"] in protect), None) or sorted(vids, key=lambda v: v["at"])[0]
+        for v in vids:
+            if v["id"] == keep["id"] or v["id"] in protect:
+                continue
+            try:
+                yt.videos().delete(id=v["id"]).execute()
+                deleted.append(v["id"])
+            except HttpError as e:
+                print(f"::warning::could not delete duplicate https://youtu.be/{v['id']} of '{title}': {str(e)[:200]}")
+        print(f"::notice title=Duplicates removed::'{title}': kept https://youtu.be/{keep['id']}, "
+              f"deleted {len([v for v in vids if v['id'] in deleted])} extra copies")
+    if deleted:
+        _RECENT.pop("items", None)
+    return deleted
+
+
 def upload(ep_dir: Path, story: dict, cfg: dict) -> dict:
     yt_cfg = cfg["youtube"]
     yt = _client()

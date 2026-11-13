@@ -66,12 +66,23 @@ def main():
 
     cfg = load_config()
     eps = [Path(args.episode)] if args.episode else pending_episodes()[::-1]  # newest first, then the backlog
-    if not eps:
-        print("No pending episodes.")
-        return
     summary = []
     failed = False
     rendered = 0
+    if not args.no_upload and cfg["youtube"].get("delete_duplicates"):
+        from .upload import remove_duplicates
+        protect = set()
+        for f in (ROOT / "episodes").glob("*/upload.json"):
+            try:
+                protect.add(json.loads(f.read_text())["video_id"])
+            except Exception:
+                pass
+        try:
+            gone = remove_duplicates(protect)
+            if gone:
+                print(f"Removed {len(gone)} duplicate video(s) from the channel")
+        except Exception as e:
+            print(f"::warning::duplicate clean-up skipped: {str(e)[:200]}")
     for ep in eps:
         if not args.no_upload and not args.episode:
             from .upload import already_uploaded
