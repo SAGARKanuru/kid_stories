@@ -30,4 +30,4 @@ jobs:
         with:
           name: voice-samples
           path: voice-samples/*.wav
-          retention-days: 7
+          retention-days: 2
