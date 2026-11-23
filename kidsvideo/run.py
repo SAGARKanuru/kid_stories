@@ -56,6 +56,26 @@ def commit_record(ep: Path):
     print(f"::warning::could not push the upload record for {ep.name}: {err}")
 
 
+def commit_files(paths: list, message: str):
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return
+    run = lambda *a: subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True)
+    run("config", "user.name", "kids-story-bot")
+    run("config", "user.email", "kids-story-bot@users.noreply.github.com")
+    run("add", *[str(p) for p in paths])
+    if run("diff", "--cached", "--quiet").returncode == 0:
+        return
+    run("commit", "-m", message)
+    for i in range(5):
+        if run("push", "origin", "HEAD:main").returncode == 0:
+            return
+        if run("pull", "--rebase", "--autostash", "-q", "origin", "main").returncode != 0:
+            run("rebase", "--abort")
+        import time
+        time.sleep(3 * (i + 1))
+    print(f"::warning::could not push: {message}")
+
+
 def add_short(ep: Path, story: dict, cfg: dict, info: dict):
     """Upload the episode's Short and note it in upload.json. A failed Short never fails the episode."""
     from .upload import upload_short, UploadLimit
@@ -189,6 +209,14 @@ def main():
             rendered += 1
             if meta.get("short"):
                 add_short(ep, story, cfg, info)
+    if not args.no_upload and not args.episode and cfg["youtube"].get("playlists", True):
+        from .playlists import sync
+        budget = int(cfg["youtube"].get("playlist_adds_per_run", 100))
+        try:
+            sync(max(10, budget - 32 * len(summary)))
+        except Exception as e:
+            print(f"::warning::playlists not updated this run: {str(e)[:300]}")
+        commit_files([ROOT / "data" / "playlists.json"], "Update playlist progress [skip ci]")
     if os.environ.get("GITHUB_STEP_SUMMARY") and summary:
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
             f.write("| Episode | Title | Length | YouTube |\n|---|---|---|---|\n" + "\n".join(summary) + "\n")
