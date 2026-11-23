@@ -809,6 +809,91 @@ def make_thumbnail(story, characters, cfg, out):
 
 
 # ====================================================================== main entry
+# ====================================================================== YouTube Short (vertical, < 60 s)
+SHORT_MAX = 52.0   # seconds of story; + end card stays well under 60 s
+COMEDY = {"bonk", "boing", "honk", "slide_up", "slide_down", "zip", "tummy", "idea", "whistle", "bleat",
+          "giggle", "hiccup", "snore", "splash", "pop"}
+
+
+def pick_short_window(story, segs):
+    """Choose the funniest stretch of the episode: explicit story['short_scene'] or the scene with the most
+    comedy sound effects / learning cards, plus following scenes while it fits."""
+    scene_segs = [k for k, sg in enumerate(segs) if sg["kind"] == "scene"]
+    if not scene_segs:
+        return 0.0, min(SHORT_MAX, segs[-1]["start"] + segs[-1]["dur"])
+    if isinstance(story.get("short_scene"), int) and 0 <= story["short_scene"] < len(scene_segs):
+        first = scene_segs[story["short_scene"]]
+    else:
+        def score(k):
+            sc = segs[k]["scene"]
+            return (sum(1 for e in sc.get("sfx", []) if e.get("name") in COMEDY) * 2 + len(sc.get("popups", []))
+                    + sum(1 for pl in sc.get("characters", []) if pl.get("action") in ("wobble", "spin", "laugh", "hop")))
+        first = max(scene_segs[:-1] or scene_segs, key=score)
+    start = segs[first]["start"]
+    end = start
+    for k in range(first, len(segs)):
+        sg = segs[k]
+        if sg["kind"] != "scene":
+            break
+        seg_end = sg["start"] + sg["dur"]
+        if seg_end - start <= SHORT_MAX:
+            end = seg_end
+            continue
+        # cut inside this scene at the end of the last line that still fits
+        for ln in sg["lines"]:
+            le = sg["start"] + ln["_start"] + ln["_dur"] + float(ln.get("pause", 0) or 0) + 0.6
+            if le - start <= SHORT_MAX:
+                end = max(end, le)
+        break
+    if end - start < 15:  # very short scene: extend into the next one
+        end = min(start + SHORT_MAX, segs[-1]["start"])
+    return start, end
+
+
+def _short_overlay(story, cfg, characters, cast, W=1080, H=1920):
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    k = W / 1080
+    top = text_block(cfg["channel_name"], 900 * k, int(46 * k), fill=(255, 236, 140), weight="SemiBold")
+    img.alpha_composite(top, ((W - top.width) // 2, int(150 * k)))
+    title = text_block(story.get("thumbnail_text") or story["title"], 980 * k, int(92 * k), fill=(255, 255, 255))
+    img.alpha_composite(title, ((W - title.width) // 2, int(150 * k) + top.height))
+    # bottom: two characters cheering + "full story" line
+    xs = [W * 0.27, W * 0.73]
+    for x, cid in zip(xs, cast[:2]):
+        h = int(330 * k * float(characters[cid].get("size", 1.0)))
+        rig.Sprite(characters[cid], h, "right" if x < W / 2 else "left", "day", seed=3).draw(
+            img, 0.0, x, H - int(150 * k), "bounce", 0, True)
+    cta = text_block("Watch the full story on our channel!", 960 * k, int(56 * k), fill=(255, 255, 255))
+    img.alpha_composite(cta, ((W - cta.width) // 2, H - int(560 * k)))
+    return img
+
+
+def make_short(ep_dir, story, cfg, characters, segs):
+    """Vertical 1080x1920 YouTube Short cut from the finished episode: blurred backdrop, the scene in the middle,
+    the title on top and two cheering characters at the bottom."""
+    start, end = pick_short_window(story, segs)
+    dur = end - start
+    cast = []
+    for sc in story["scenes"]:
+        for pl in sc.get("characters", []):
+            if pl["id"] not in cast and pl["id"] in characters:
+                cast.append(pl["id"])
+    ov_path = ep_dir / "build" / "short_overlay.png"
+    _short_overlay(story, cfg, characters, cast).save(ov_path)
+    out = ep_dir / "short.mp4"
+    fl = ("[0:v]split[a][b];"
+          "[a]scale=-2:1920,crop=1080:1920,boxblur=28:2,eq=brightness=-0.10:saturation=1.2[bg];"
+          "[b]scale=1080:-2[fg];"
+          "[bg][fg]overlay=0:(H-h)/2-40[base];"
+          f"[base][1:v]overlay=0:0,fade=t=in:st=0:d=0.4,fade=t=out:st={dur - 0.8:.2f}:d=0.8,format=yuv420p[v];"
+          f"[0:a]afade=t=in:st=0:d=0.3,afade=t=out:st={dur - 1.0:.2f}:d=1.0[a]")
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{start:.3f}", "-t", f"{dur:.3f}", "-i", str(ep_dir / "video.mp4"),
+                    "-i", str(ov_path), "-filter_complex", fl, "-map", "[v]", "-map", "[a]", "-r", "30",
+                    "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-c:a", "aac", "-b:a", "160k",
+                    "-movflags", "+faststart", str(out)], check=True)
+    return {"short": str(out), "short_window": [round(start, 2), round(end, 2)]}
+
+
 def render_episode(ep_dir: Path, workers: int | None = None, preview_only=False) -> dict:
     ep_dir = Path(ep_dir)
     story = json.loads((ep_dir / "story.json").read_text())
@@ -883,5 +968,10 @@ def render_episode(ep_dir: Path, workers: int | None = None, preview_only=False)
            "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(out)]
     subprocess.run(cmd, check=True)
     meta = {"video": str(out), "thumbnail": str(ep_dir / "thumbnail.jpg"), "duration": round(total, 2)}
+    if cfg["youtube"].get("shorts"):
+        try:
+            meta.update(make_short(ep_dir, story, cfg, characters, segs))
+        except Exception as e:
+            print(f"::warning::Short not made: {str(e)[:300]}")
     (ep_dir / "render.json").write_text(json.dumps(meta, indent=2))
     return meta

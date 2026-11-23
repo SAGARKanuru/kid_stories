@@ -56,12 +56,41 @@ def commit_record(ep: Path):
     print(f"::warning::could not push the upload record for {ep.name}: {err}")
 
 
+def add_short(ep: Path, story: dict, cfg: dict, info: dict):
+    """Upload the episode's Short and note it in upload.json. A failed Short never fails the episode."""
+    from .upload import upload_short, UploadLimit
+    try:
+        sh = upload_short(ep, story, cfg, info["url"])
+        info["short"] = sh
+        (ep / "upload.json").write_text(json.dumps(info, indent=2))
+        commit_record(ep)
+    except UploadLimit:
+        print(f"::warning title=YouTube daily limit::Short for {ep.name} will upload on the next run.")
+    except Exception as e:
+        print(f"::warning title={ep.name} Short failed::{str(e)[:300]}")
+
+
+def pending_shorts(cfg) -> list:
+    """Episodes already on YouTube (since shorts were switched on) that still have no Short."""
+    since = str(cfg["youtube"].get("shorts_from", "9999"))
+    out = []
+    for f in sorted((ROOT / "episodes").glob("*/upload.json")):
+        ep = f.parent
+        try:
+            info = json.loads(f.read_text())
+        except Exception:
+            continue
+        if ep.name >= since and not info.get("short") and info.get("url"):
+            out.append(ep)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--episode", help="episode folder (default: all pending in episodes/)")
     ap.add_argument("--no-upload", action="store_true")
-    ap.add_argument("--max", type=int, default=int(os.environ.get("MAX_EPISODES", "5")),
-                    help="most new videos to render+upload in one run (YouTube allows ~6 uploads a day)")
+    ap.add_argument("--max", type=int, default=int(os.environ.get("MAX_EPISODES", "3")),
+                    help="most episodes to render+upload in one run (each = video + Short; YouTube allows ~6 uploads a day)")
     args = ap.parse_args()
 
     cfg = load_config()
@@ -131,6 +160,8 @@ def main():
                 info = upload(ep, story, cfg)
                 record_history(ep, story, info)
                 commit_record(ep)
+                if meta.get("short"):
+                    add_short(ep, story, cfg, info)
             rendered += 1
         except BaseException as e:
             if type(e).__name__ == "UploadLimit":
@@ -143,6 +174,21 @@ def main():
             print(f"::error title={ep.name} {stage} failed::{type(e).__name__}: {str(e)[:500]} | {where}")
             raise
         summary.append(f"| {ep.name} | {story['title']} | {meta['duration']:.0f}s | {(info or {}).get('url', 'not uploaded')} |")
+    if not args.no_upload and not args.episode and cfg["youtube"].get("shorts"):
+        for ep in pending_shorts(cfg)[::-1]:
+            if rendered >= args.max:
+                break
+            story = json.loads((ep / "story.json").read_text())
+            info = json.loads((ep / "upload.json").read_text())
+            print(f"▶ Making the Short for {ep.name}: {story['title']}")
+            try:
+                meta = render_episode(ep)
+            except Exception as e:
+                print(f"::warning title={ep.name} Short failed::{str(e)[:300]}")
+                continue
+            rendered += 1
+            if meta.get("short"):
+                add_short(ep, story, cfg, info)
     if os.environ.get("GITHUB_STEP_SUMMARY") and summary:
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
             f.write("| Episode | Title | Length | YouTube |\n|---|---|---|---|\n" + "\n".join(summary) + "\n")

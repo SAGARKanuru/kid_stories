@@ -83,5 +83,7 @@ youtube:
   made_for_kids: true            # required for children's content (COPPA)
   contains_synthetic_media: true # discloses AI-generated story, art and voices
   default_language: "en"
+  shorts: true                   # also upload a vertical YouTube Short (< 60 s) of each episode's funniest part
+  shorts_from: "2026-11-23"      # make Shorts for episodes from this date on (older ones are skipped)
   delete_duplicates: false       # true = remove extra copies of this pipeline's episodes only (keeps one); never touches your own uploads
   playlist_id: ""                # optional: add each upload to this playlist

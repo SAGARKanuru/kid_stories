@@ -127,6 +127,53 @@ def remove_duplicates(protect: set, episode_titles: set) -> list:
     return deleted
 
 
+def upload_short(ep_dir: Path, story: dict, cfg: dict, full_url: str) -> dict:
+    """Upload the vertical Short (made by the renderer) and link it to the full episode."""
+    yt_cfg = cfg["youtube"]
+    yt = _client()
+    hook = story.get("thumbnail_text") or story["title"]
+    title = f"{hook} #Shorts"[:100]
+    if hook == story["title"]:
+        title = f"{story['title'][:88]} #Shorts"
+    existing = [v for v in recent_uploads(yt) if v["title"] == title]
+    if existing:
+        vid = existing[0]["id"]
+        print(f"  Short already on the channel: https://youtu.be/{vid}")
+        return {"video_id": vid, "url": f"https://youtu.be/{vid}", "note": "already on the channel"}
+    desc = (f"{story['description'].split('. ')[0].rstrip('.')}.\n\n"
+            f"\U0001F3AC Watch the full story: {full_url}\n\n"
+            f"\U0001F31F {story['moral']}\n\n#Shorts #KidsStories #Cartoon #MoralStory")[:4900]
+    body = {
+        "snippet": {"title": title, "description": desc, "tags": (story.get("tags", [])[:8] + ["shorts"]),
+                    "categoryId": str(yt_cfg.get("category_id", "1")),
+                    "defaultLanguage": yt_cfg.get("default_language", "en"),
+                    "defaultAudioLanguage": yt_cfg.get("default_language", "en")},
+        "status": {"privacyStatus": yt_cfg.get("privacy", "private"),
+                   "selfDeclaredMadeForKids": bool(yt_cfg.get("made_for_kids", True)),
+                   "containsSyntheticMedia": bool(yt_cfg.get("contains_synthetic_media", True))},
+    }
+    media = MediaFileUpload(str(ep_dir / "short.mp4"), mimetype="video/mp4", chunksize=8 * 1024 * 1024, resumable=True)
+    req = yt.videos().insert(part="snippet,status", body=body, media_body=media)
+    resp, retries = None, 0
+    while resp is None:
+        try:
+            _, resp = req.next_chunk()
+        except HttpError as e:
+            if e.resp.status in (500, 502, 503, 504) and retries < 6:
+                retries += 1
+                time.sleep(2 ** retries)
+                continue
+            if e.resp.status in (400, 403) and any(r in str(e) for r in ("uploadLimitExceeded", "quotaExceeded",
+                                                                          "dailyLimitExceeded")):
+                raise UploadLimit(str(e)[:300]) from None
+            raise
+    vid = resp["id"]
+    print(f"Uploaded Short: https://youtu.be/{vid}")
+    _RECENT.setdefault("items", []).insert(0, {"id": vid, "title": title, "at": time.strftime("%Y-%m-%dT%H:%M:%SZ")})
+    return {"video_id": vid, "url": f"https://youtu.be/{vid}",
+            "uploaded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+
+
 def upload(ep_dir: Path, story: dict, cfg: dict) -> dict:
     yt_cfg = cfg["youtube"]
     yt = _client()
