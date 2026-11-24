@@ -95,6 +95,8 @@ def _old_story(date: str):
     p = ROOT / "episodes" / date / "story.json"
     if p.exists():
         return json.loads(p.read_text())
+    if not load_config()["youtube"].get("shorts_backfill_from_history", False):
+        return None  # only episodes whose folder is still in the repo
     rel = f"episodes/{date}/story.json"
     git = lambda *a: subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True)
     sha = git("rev-list", "-n", "1", "HEAD", "--", rel).stdout.strip()
@@ -124,8 +126,7 @@ def backfill_shorts(cfg, limit: int) -> int:
             continue
         story = _old_story(date)
         if not story:
-            state[date] = {"skipped": "story not found"}
-            continue
+            continue  # not available (folder deleted); can be switched on later
         work = ROOT / "backfill" / date
         work.mkdir(parents=True, exist_ok=True)
         (work / "story.json").write_text(json.dumps(story))
@@ -152,7 +153,8 @@ def backfill_shorts(cfg, limit: int) -> int:
             shutil.rmtree(work, ignore_errors=True)
             state_path.write_text(json.dumps(state, indent=1, sort_keys=True))
             commit_files([state_path] + ([up] if up.exists() else []), f"Short for {date} [skip ci]")
-    left = sum(1 for h in hist if h.get("video") and (h.get("date") not in state or state[h["date"]].get("retry"))
+    left = sum(1 for h in hist if h.get("video") and (ROOT / "episodes" / h["date"] / "story.json").exists()
+               and (h.get("date") not in state or state[h["date"]].get("retry"))
                and not ((ROOT / "episodes" / h["date"] / "upload.json").exists()
                         and json.loads((ROOT / "episodes" / h["date"] / "upload.json").read_text()).get("short")))
     print(f"Shorts backfill: {made} made this run, {left} older episodes still to go")
