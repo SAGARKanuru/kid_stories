@@ -90,6 +90,75 @@ def add_short(ep: Path, story: dict, cfg: dict, info: dict):
         print(f"::warning title={ep.name} Short failed::{str(e)[:300]}")
 
 
+def _old_story(date: str):
+    """story.json of an episode, from the repo or (if its folder was deleted) from git history."""
+    p = ROOT / "episodes" / date / "story.json"
+    if p.exists():
+        return json.loads(p.read_text())
+    rel = f"episodes/{date}/story.json"
+    git = lambda *a: subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True)
+    sha = git("rev-list", "-n", "1", "HEAD", "--", rel).stdout.strip()
+    if not sha:
+        return None
+    r = git("show", f"{sha}^:{rel}")
+    return json.loads(r.stdout) if r.returncode == 0 and r.stdout else None
+
+
+def backfill_shorts(cfg, limit: int) -> int:
+    """Make and upload Shorts for older episodes that don't have one yet, newest first, `limit` per run.
+    Progress is kept in data/shorts.json (and in the episode's upload.json when its folder still exists)."""
+    import shutil
+    from .upload import UploadLimit, upload_short
+    hist_path, state_path = ROOT / "data" / "history.json", ROOT / "data" / "shorts.json"
+    hist = json.loads(hist_path.read_text()) if hist_path.exists() else []
+    state = json.loads(state_path.read_text()) if state_path.exists() else {}
+    made = 0
+    for h in sorted(hist, key=lambda x: x.get("date", ""), reverse=True):
+        if made >= limit:
+            break
+        date, url = h.get("date", ""), h.get("video")
+        if not url or (date in state and not state[date].get("retry")):
+            continue
+        up = ROOT / "episodes" / date / "upload.json"
+        if up.exists() and json.loads(up.read_text()).get("short"):
+            continue
+        story = _old_story(date)
+        if not story:
+            state[date] = {"skipped": "story not found"}
+            continue
+        work = ROOT / "backfill" / date
+        work.mkdir(parents=True, exist_ok=True)
+        (work / "story.json").write_text(json.dumps(story))
+        print(f"▶ Making the Short for {date}: {story['title']}")
+        try:
+            meta = render_episode(work)
+            if not meta.get("short"):
+                raise RuntimeError("no Short was produced")
+            sh = upload_short(work, story, cfg, url)
+            sh["full"] = url
+            state[date] = sh
+            if up.exists():
+                info = json.loads(up.read_text())
+                info["short"] = sh
+                up.write_text(json.dumps(info, indent=2))
+            made += 1
+        except UploadLimit:
+            print("::warning title=YouTube daily limit::More Shorts will upload on the next run.")
+            break
+        except Exception as e:
+            print(f"::warning title={date} Short failed::{str(e)[:300]}")
+            state[date] = {"failed": str(e)[:200], "retry": True}
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
+            state_path.write_text(json.dumps(state, indent=1, sort_keys=True))
+            commit_files([state_path] + ([up] if up.exists() else []), f"Short for {date} [skip ci]")
+    left = sum(1 for h in hist if h.get("video") and (h.get("date") not in state or state[h["date"]].get("retry"))
+               and not ((ROOT / "episodes" / h["date"] / "upload.json").exists()
+                        and json.loads((ROOT / "episodes" / h["date"] / "upload.json").read_text()).get("short")))
+    print(f"Shorts backfill: {made} made this run, {left} older episodes still to go")
+    return made
+
+
 def pending_shorts(cfg) -> list:
     """Episodes already on YouTube (since shorts were switched on) that still have no Short."""
     since = str(cfg["youtube"].get("shorts_from", "9999"))
@@ -194,26 +263,15 @@ def main():
             print(f"::error title={ep.name} {stage} failed::{type(e).__name__}: {str(e)[:500]} | {where}")
             raise
         summary.append(f"| {ep.name} | {story['title']} | {meta['duration']:.0f}s | {(info or {}).get('url', 'not uploaded')} |")
+    shorts_made = 0
     if not args.no_upload and not args.episode and cfg["youtube"].get("shorts"):
-        for ep in pending_shorts(cfg)[::-1]:
-            if rendered >= args.max:
-                break
-            story = json.loads((ep / "story.json").read_text())
-            info = json.loads((ep / "upload.json").read_text())
-            print(f"▶ Making the Short for {ep.name}: {story['title']}")
-            try:
-                meta = render_episode(ep)
-            except Exception as e:
-                print(f"::warning title={ep.name} Short failed::{str(e)[:300]}")
-                continue
-            rendered += 1
-            if meta.get("short"):
-                add_short(ep, story, cfg, info)
+        shorts_made = backfill_shorts(cfg, int(cfg["youtube"].get("shorts_backfill_per_run", 3)))
     if not args.no_upload and not args.episode and cfg["youtube"].get("playlists", True):
         from .playlists import sync
         budget = int(cfg["youtube"].get("playlist_adds_per_run", 100))
         try:
-            sync(max(10, budget - 32 * len(summary)))
+            uploads = 2 * len(summary) + shorts_made  # each upload uses ~1,650 of YouTube's ~10,000 daily units
+            sync(max(5, min(budget, (9000 - 1650 * uploads) // 50)))
         except Exception as e:
             print(f"::warning::playlists not updated this run: {str(e)[:300]}")
         commit_files([ROOT / "data" / "playlists.json"], "Update playlist progress [skip ci]")

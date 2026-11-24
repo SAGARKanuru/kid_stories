@@ -84,7 +84,7 @@ youtube:
   contains_synthetic_media: true # discloses AI-generated story, art and voices
   default_language: "en"
   shorts: true                   # also upload a vertical YouTube Short (< 60 s) of each episode's funniest part
-  shorts_from: "2026-11-23"      # make Shorts for episodes from this date on (older ones are skipped)
+  shorts_backfill_per_run: 3     # Shorts made for OLDER episodes each run (newest first) until all have one
   playlists: true                # put every video into topic playlists (Learn Counting, Bedtime Stories, ...)
   playlist_adds_per_run: 100     # older videos are added a batch at a time to stay within YouTube's daily limit
   delete_duplicates: false       # true = remove extra copies of this pipeline's episodes only (keeps one); never touches your own uploads

@@ -69,7 +69,7 @@ jobs:
         run: |
           git config user.name "kids-story-bot"
           git config user.email "kids-story-bot@users.noreply.github.com"
-          git add data/history.json data/playlists.json episodes/*/upload.json 2>/dev/null || true
+          git add data/history.json data/playlists.json data/shorts.json episodes/*/upload.json 2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "Record uploaded episode [skip ci]"
             for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 5; done

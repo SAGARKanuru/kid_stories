@@ -36,6 +36,8 @@ PLAYLISTS = {
                               "something new, for kids aged 3 to 8.",
     "Laddu & Chintu Shorts": "Quick laughs and learning with Laddu, Chintu and Golu the goat. Watch the full "
                              "stories on our channel!",
+    "Pip & Tumble Shorts": "Quick, gentle moments with Pip the fox, Tumble the elephant and Nana Hoot. Watch the full "
+                           "stories on our channel!",
 }
 
 LEARNING = [
@@ -92,13 +94,26 @@ def wanted() -> list:
     for h in reversed(hist):
         if h.get("video"):
             out.append((_vid(h["video"]), classify(h), h.get("title", "")))
+    cast_by_date = {h.get("date"): set(h.get("cast") or []) for h in hist}
+    seen = set()
+
+    def short_list(date):
+        return ["Pip & Tumble Shorts"] if cast_by_date.get(date, set()) & OLD_CAST else ["Laddu & Chintu Shorts"]
+
     for f in sorted((ROOT / "episodes").glob("*/upload.json"), reverse=True):
         try:
             info = json.loads(f.read_text())
         except Exception:
             continue
         if info.get("short", {}).get("url"):
-            out.append((_vid(info["short"]["url"]), ["Laddu & Chintu Shorts"], f.parent.name + " Short"))
+            v = _vid(info["short"]["url"])
+            seen.add(v)
+            out.append((v, short_list(f.parent.name), f.parent.name + " Short"))
+    sp = ROOT / "data" / "shorts.json"
+    if sp.exists():
+        for date, sh in sorted(json.loads(sp.read_text()).items(), reverse=True):
+            if sh.get("url") and _vid(sh["url"]) not in seen:
+                out.append((_vid(sh["url"]), short_list(date), date + " Short"))
     return out
 
 
