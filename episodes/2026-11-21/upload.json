@@ -2,5 +2,11 @@
   "video_id": "bHkU_L_Feis",
   "url": "https://youtu.be/bHkU_L_Feis",
   "privacy": "public",
-  "uploaded_at": "2026-11-20T23:51:51Z"
+  "uploaded_at": "2026-11-20T23:51:51Z",
+  "short": {
+    "video_id": "GgRnsZOjVfE",
+    "url": "https://youtu.be/GgRnsZOjVfE",
+    "uploaded_at": "2026-11-24T04:26:59Z",
+    "full": "https://youtu.be/bHkU_L_Feis"
+  }
 }
