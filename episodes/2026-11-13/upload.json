@@ -4,5 +4,11 @@
   "privacy": "unknown",
   "uploaded_at": "2026-11-13T04:11:20Z",
   "note": "found already on the channel; not uploaded again",
-  "duplicates": []
+  "duplicates": [],
+  "short": {
+    "video_id": "YLhbzTITtko",
+    "url": "https://youtu.be/YLhbzTITtko",
+    "uploaded_at": "2026-11-27T00:05:31Z",
+    "full": "https://youtu.be/sBeXlPvuabo"
+  }
 }
